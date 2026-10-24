@@ -160,3 +160,36 @@ input[type=range] { padding: 0; height: 44px; }
 .pick.in-party { border-color: #6a7cff; background: #1a1e2e; }
 .pick .party-badge { font-size: 10px; color: var(--accent); background: #262b45; border-radius: 8px; padding: 2px 6px; }
 #cardAppearance, #cardFetish { min-height: 96px; resize: vertical; }
+
+/* Scene editor — phone-first custom bots */
+.btn.big { min-height: 56px; font-size: 17px; font-weight: 650; width: 100%; }
+.field-big input { min-height: 52px; font-size: 17px; }
+.bot-list { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+.bot-card {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 12px; min-height: 64px; text-align: left;
+  background: var(--panel2); color: var(--text);
+  border: 2px solid var(--border); border-radius: 14px;
+  font: inherit; cursor: pointer; touch-action: manipulation;
+}
+.bot-card:active { transform: scale(.98); }
+.bot-card.selected { border-color: var(--accent); background: #1a1e2e; box-shadow: 0 0 0 1px var(--accent); }
+.bot-card-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.bot-card-name { font-weight: 650; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bot-card-sub { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bot-editor { margin-top: 8px; padding-top: 4px; border-top: 1px solid var(--border); }
+.sticky-actions { position: sticky; bottom: 8px; margin-top: 18px; padding: 8px 0; background: linear-gradient(transparent, var(--bg) 30%); }
+.templates-fold { margin: 28px 0 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--panel); }
+.templates-fold summary { cursor: pointer; font-weight: 650; min-height: 44px; display: flex; align-items: center; color: var(--muted); }
+.templates-fold[open] summary { margin-bottom: 8px; color: var(--text); }
+.bot-empty { color: var(--muted); text-align: center; padding: 18px 12px; border: 1px dashed var(--border); border-radius: 12px; }
+
+/* Stories list */
+.bot-images-list { display: flex; flex-direction: column; gap: 12px; margin: 10px 0; }
+.bot-image-row {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+}
+.bot-image-row .field { margin: 0; }
+.bot-image-actions { display: flex; gap: 8px; }
+.story-card-count { font-size: 12px; color: var(--muted); }

@@ -29,13 +29,15 @@ The app talks to any **OpenAI-compatible** chat API from your browser.
 
 Quick picks in Settings are labelled free vs paid. Euryale-style models need OpenRouter credit; free models may refuse NSFW.
 
-## 3. Personas
-Bottom nav: **Chat | Personas | Prompt | Settings | Gallery**.
+## 3. Stories & custom bots (Cards)
+Bottom nav: **Chat | Cards | Prompt | Settings | Gallery**.
 
-- Personas load from `personas/*.json` (listed in `personas/index.json`).
-- Each has: name, tagline, personality, speaking_style, scenario, boundaries, greeting, avatar, gallery.
-- Active persona and **per-persona chat history** are saved in localStorage.
-- Starters included: Default Assistant, Ember Vale, Kael Orbit (all fictional adults).
+1. **Cards → Add Story** — give it a title.
+2. Open the story → **Add bot** — Name, Appearance, Sex fetish, optional portrait URL.
+3. **Images + triggers** — Image URL + comma-separated trigger phrases (e.g. `ares cum`). When that text appears in chat (you or a bot), the image shows in the bubble.
+4. **Open Chat** — each bot replies as itself (separate API calls). You play your own role.
+
+Everything saves in this browser (`cchat_` localStorage). Optional preset templates (Ember / Kael / Default) can seed a custom bot; they are not the main flow.
 
 ## 4. Edit prompts and personas on GitHub
 - **`lib/prompt.txt`** — hard rules + general tone (always assembled first). Edit on GitHub → pencil → Commit. After Pages refreshes, tap **Load from lib** in the Prompt tab (or Reset if you had an override).
