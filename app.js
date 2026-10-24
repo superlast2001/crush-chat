@@ -8,6 +8,10 @@
     settings: 'cchat_settings',
     persona: 'cchat_persona',
     chats: 'cchat_chats',
+    party: 'cchat_party',
+    sceneChats: 'cchat_scene_chats',
+    sceneTitles: 'cchat_scene_titles',
+    cardOverrides: 'cchat_card_overrides',
     promptOverrides: 'cchat_prompt_overrides',
     galleryOverlay: 'cchat_gallery_overlay',
     galleryHidden: 'cchat_gallery_hidden',
@@ -55,6 +59,11 @@
     personas: [],
     activeId: null,
     chats: {},
+    party: [],
+    sceneChats: {},
+    sceneTitles: {},
+    cardOverrides: {},
+    directId: null,
     promptOverrides: {},
     galleryOverlay: {},
     galleryHidden: {},
@@ -104,23 +113,135 @@
     return out.slice(0, MAX_GALLERY);
   }
 
-  function activePersona() {
+  function personaById(id) {
     for (var i = 0; i < state.personas.length; i++) {
-      if (state.personas[i].id === state.activeId) return state.personas[i];
+      if (state.personas[i].id === id) return state.personas[i];
     }
-    return state.personas[0] || null;
+    return null;
   }
+  function activePersona() {
+    return personaById(state.activeId) || state.personas[0] || null;
+  }
+  function normalizeParty(ids) {
+    if (!Array.isArray(ids)) return [];
+    var seen = {};
+    var out = [];
+    for (var i = 0; i < ids.length; i++) {
+      var id = ids[i];
+      if (typeof id !== 'string' || !id || seen[id]) continue;
+      if (!personaById(id) && state.personas.length) continue;
+      seen[id] = 1;
+      out.push(id);
+    }
+    return out;
+  }
+  function isPartyMode() {
+    return state.party.length >= 2;
+  }
+  function partyPersonas() {
+    var list = [];
+    for (var i = 0; i < state.party.length; i++) {
+      var p = personaById(state.party[i]);
+      if (p) list.push(p);
+    }
+    return list;
+  }
+  function partyKey() {
+    return state.party.slice().sort().join('|') || 'empty';
+  }
+  function saveParty() { save(LS.party, state.party); }
   function chat() {
+    if (isPartyMode()) {
+      var key = partyKey();
+      if (!state.sceneChats[key]) state.sceneChats[key] = [];
+      return state.sceneChats[key];
+    }
     var p = activePersona();
     if (!p) return [];
     if (!state.chats[p.id]) state.chats[p.id] = [];
     return state.chats[p.id];
   }
-  function saveChats() { save(LS.chats, state.chats); }
+  function saveChats() {
+    if (isPartyMode()) save(LS.sceneChats, state.sceneChats);
+    else save(LS.chats, state.chats);
+  }
+  function saveSceneChats() { save(LS.sceneChats, state.sceneChats); }
   function saveOverrides() { save(LS.promptOverrides, state.promptOverrides); }
   function saveGalleryOverlay() { save(LS.galleryOverlay, state.galleryOverlay); }
   function saveGalleryHidden() { save(LS.galleryHidden, state.galleryHidden); }
   function saveAvatarOverrides() { save(LS.avatarOverrides, state.avatarOverrides); }
+  function saveCardOverrides() { save(LS.cardOverrides, state.cardOverrides); }
+  function saveSceneTitles() { save(LS.sceneTitles, state.sceneTitles); }
+
+  function cardFor(id) {
+    var c = state.cardOverrides[id];
+    if (!c || typeof c !== 'object') return { name: '', appearance: '', fetish: '' };
+    return {
+      name: typeof c.name === 'string' ? c.name : '',
+      appearance: typeof c.appearance === 'string' ? c.appearance : '',
+      fetish: typeof c.fetish === 'string' ? c.fetish : ''
+    };
+  }
+
+  function effectiveName(p) {
+    if (!p) return '';
+    var n = clean(cardFor(p.id).name, 80);
+    return n || p.name || p.id;
+  }
+
+  function effectiveAppearance(p) {
+    if (!p) return '';
+    return clean(cardFor(p.id).appearance, 2000);
+  }
+
+  function effectiveFetish(p) {
+    if (!p) return '';
+    return clean(cardFor(p.id).fetish, 2000);
+  }
+
+  function sceneTitleKey() {
+    return isPartyMode() ? partyKey() : ('solo:' + (state.activeId || 'none'));
+  }
+
+  function currentSceneTitle() {
+    var t = state.sceneTitles[sceneTitleKey()];
+    return typeof t === 'string' ? t : '';
+  }
+
+  function setSceneTitle(title) {
+    var key = sceneTitleKey();
+    var t = clean(title, 120);
+    if (t) state.sceneTitles[key] = t;
+    else delete state.sceneTitles[key];
+    saveSceneTitles();
+  }
+
+  function systemPromptFor(persona) {
+    var p = persona || activePersona();
+    if (!p) return state.libText;
+    var ov = state.promptOverrides[p.id];
+    if (typeof ov === 'string' && ov.trim()) {
+      // Keep user override, but always re-attach card + scene continuity so bots do not go dumb mid-scene.
+      return ov.trim() + '\n\n' + continuityBlock(p);
+    }
+    return buildSystemPrompt(p);
+  }
+
+  function continuityBlock(p) {
+    var name = effectiveName(p);
+    var appearance = effectiveAppearance(p);
+    var fetish = effectiveFetish(p);
+    var avatar = effectiveAvatar(p);
+    var title = currentSceneTitle();
+    var lines = ['CONTINUITY (always apply — do not forget):'];
+    if (title) lines.push('Scene title: ' + title);
+    lines.push('You are: ' + name);
+    if (appearance) lines.push('Appearance (must match image): ' + appearance);
+    if (avatar) lines.push('Image: ' + avatar);
+    if (fetish) lines.push('Sex fetish: ' + fetish);
+    lines.push('Stay in character as ONLY this person. Never speak for the user. Do not go vague or OOC-dumb.');
+    return lines.join('\n');
+  }
 
   function effectiveAvatar(p) {
     if (!p) return '';
@@ -134,15 +255,34 @@
 
   function personaWithAvatar(p) {
     if (!p) return p;
-    return Object.assign({}, p, { avatar: effectiveAvatar(p) });
+    return Object.assign({}, p, { avatar: effectiveAvatar(p), name: effectiveName(p) });
   }
 
   function personaBlock(p) {
-    var lines = ['PERSONA: ' + p.name];
+    var name = effectiveName(p);
+    var appearance = effectiveAppearance(p);
+    var fetish = effectiveFetish(p);
+    var avatar = effectiveAvatar(p);
+    var lines = ['CHARACTER CARD — you ARE this character only:'];
+    lines.push('Name: ' + name);
+    if (appearance) {
+      lines.push('Appearance: ' + appearance);
+      lines.push('CRITICAL: Your appearance MUST match the character image/portrait at all times. Never forget or rewrite how you look mid-scene.');
+    }
+    if (avatar) {
+      lines.push('Image / portrait URL: ' + avatar);
+      lines.push('Treat that image as ground truth for your body, face, hair, clothes, and vibe.');
+    }
+    if (fetish) {
+      lines.push('Sex fetish / kinks (adult 18+ only): ' + fetish);
+      lines.push('When the scene is sexual, lean into these preferences. Every character involved must be 18+ adults.');
+    }
     if (p.personality) lines.push('Personality: ' + p.personality);
     if (p.speaking_style) lines.push('Speaking style: ' + p.speaking_style);
-    if (p.scenario) lines.push('Scenario: ' + p.scenario);
+    if (p.scenario) lines.push('Default scenario notes: ' + p.scenario);
     if (p.boundaries) lines.push('Notes: ' + p.boundaries);
+    lines.push('Stay sharp and in-character. Do not go vague, OOC, or suddenly dumb. Do not forget your name, appearance, fetish, or the scene.');
+    lines.push('Never speak or act for the user\'s character. Never speak lines for other bots\' characters.');
     return lines.join('\n');
   }
 
@@ -151,11 +291,15 @@
     if (!p) return state.libText;
     var level = normalizeIntensity(intensity != null ? intensity : state.intensity);
     var style = (state.style && state.style[level]) || STYLE[level];
+    var title = currentSceneTitle();
     var parts = [
       state.libText.trim(),
-      style,
-      personaBlock(p)
+      style
     ];
+    if (title) {
+      parts.push('SCENE TITLE: ' + title + '\nYou are in this named scene. Keep continuity with the title and prior turns.');
+    }
+    parts.push(personaBlock(p));
     return parts.filter(Boolean).join('\n\n');
   }
 
@@ -248,12 +392,39 @@
     };
     return Object.assign(body, overrides || {});
   }
-  function buildMessages(history) {
+  function buildMessages(history, persona) {
+    var p = persona || activePersona();
     var msgs = [];
-    var sys = effectiveSystemPrompt();
-    if (sys.trim()) msgs.push({ role: 'system', content: sys });
+    var sys = p ? systemPromptFor(p) : effectiveSystemPrompt();
+    if (isPartyMode() && p) {
+      var myName = effectiveName(p);
+      var otherNames = partyPersonas().filter(function (x) { return x.id !== p.id; }).map(function (x) { return effectiveName(x); });
+      var title = currentSceneTitle();
+      var partyNote = [
+        'MULTI-BOT SCENE ROLE: You are ONLY ' + myName + '. Other bots control other characters in the same shared chat.',
+        title ? ('Scene title: ' + title + '.') : '',
+        'Other characters (do NOT speak for them): ' + (otherNames.join(', ') || '(none)') + '.',
+        'You receive the shared scene history so you remember prior turns. Stay consistent with what already happened.',
+        'Reply ONLY as ' + myName + ' — first person or in-character narration for yourself alone.',
+        'Never speak for the user. Never drop IQ, go OOC, or forget your appearance, image, or sex fetish mid-scene.',
+        'Keep replies vivid, proactive, and explicit when the scene calls for it (STYLE / intensity still apply).'
+      ].filter(Boolean).join(' ');
+      sys = (sys || '').trim() + '\n\n' + partyNote;
+    }
+    if (sys && String(sys).trim()) msgs.push({ role: 'system', content: String(sys).trim() });
     history.forEach(function (m) {
-      if (m.role === 'user' || m.role === 'assistant') msgs.push({ role: m.role, content: m.content });
+      if (m.role === 'user') {
+        msgs.push({ role: 'user', content: m.content });
+        return;
+      }
+      if (m.role !== 'assistant') return;
+      if (!isPartyMode() || !p || !m.personaId || m.personaId === p.id) {
+        msgs.push({ role: 'assistant', content: m.content });
+        return;
+      }
+      var speaker = personaById(m.personaId);
+      var label = speaker ? effectiveName(speaker) : 'Character';
+      msgs.push({ role: 'user', content: '[' + label + ']: ' + m.content });
     });
     return msgs;
   }
@@ -361,10 +532,19 @@
     if (!list.length) {
       var e = document.createElement('div');
       e.className = 'empty';
-      e.textContent = p ? ('Start chatting with ' + p.name + '.') : 'Pick a persona first.';
+      if (isPartyMode()) {
+        var names = partyPersonas().map(function (x) { return effectiveName(x); }).join(', ');
+        var st = currentSceneTitle();
+        e.textContent = (st ? (st + ' — ') : '') + 'Multi-bot chat with ' + names + '. Send a message — each character replies in turn.';
+      } else {
+        e.textContent = p ? ('Start chatting with ' + p.name + '.') : 'Pick a persona first.';
+      }
       box.appendChild(e);
     }
-    list.forEach(function (m, idx) { box.appendChild(renderMsg(m, idx, p)); });
+    list.forEach(function (m, idx) {
+      var speaker = m.role === 'assistant' ? (personaById(m.personaId) || p) : p;
+      box.appendChild(renderMsg(m, idx, speaker));
+    });
     box.scrollTop = box.scrollHeight;
     $('btnRegen').disabled = state.busy || !list.some(function (m) { return m.role === 'user'; });
   }
@@ -372,9 +552,10 @@
   function renderMsg(m, idx, p) {
     var el = document.createElement('div');
     el.className = 'msg ' + m.role;
+    if (m.personaId) el.setAttribute('data-persona-id', m.personaId);
     var who = document.createElement('div');
     who.className = 'who';
-    who.textContent = m.role === 'user' ? 'You' : ((p && p.name) || 'Assistant');
+    who.textContent = m.role === 'user' ? 'You' : ((p && effectiveName(p)) || 'Assistant');
     var body = document.createElement('div');
     body.className = 'body';
     renderBody(body, m.content, true);
@@ -421,21 +602,19 @@
     $('btnRegen').disabled = b;
   }
 
-  async function generateReply() {
-    var err = preflightError();
-    if (err) { showChatError(err); return; }
-    showChatError(null);
+  async function generateOneReply(persona) {
     var list = chat();
-    var payload = buildMessages(list);
-    var msg = { role: 'assistant', content: '' };
+    var payload = buildMessages(list, persona);
+    var msg = { role: 'assistant', content: '', personaId: persona ? persona.id : undefined };
+    if (!persona) delete msg.personaId;
     list.push(msg);
     renderMessages();
     var box = $('messages');
     var last = box.lastElementChild;
-    var el = last.classList.contains('msg-row') ? last.querySelector('.msg') : last;
+    var el = last && last.classList.contains('msg-row') ? last.querySelector('.msg') : last;
+    if (!el) return;
     el.classList.add('streaming');
     var bodyEl = el.querySelector('.body');
-    setBusy(true);
     state.controller = new AbortController();
     try {
       await complete(payload, function (text) {
@@ -443,11 +622,51 @@
         renderBody(bodyEl, text, false);
         box.scrollTop = box.scrollHeight;
       }, state.controller.signal);
-      if (!msg.content) showChatError('The API returned an empty reply. Try Regenerate or another model.');
+      if (!msg.content) showChatError('The API returned an empty reply from ' + ((persona && persona.name) || 'assistant') + '. Try Regenerate or another model.');
+    } catch (e) {
+      if (e.name !== 'AbortError') showChatError(e.message || String(e));
+      else throw e;
+    } finally {
+      if (!msg.content) {
+        var i = list.indexOf(msg);
+        if (i >= 0) list.splice(i, 1);
+      }
+      state.controller = null;
+      saveChats();
+      renderMessages();
+    }
+  }
+
+  function speakersForNextTurn() {
+    if (!isPartyMode()) {
+      var p = activePersona();
+      return p ? [p] : [];
+    }
+    if (state.directId) {
+      var d = personaById(state.directId);
+      if (d && state.party.indexOf(d.id) >= 0) return [d];
+    }
+    return partyPersonas();
+  }
+
+  async function generateReply() {
+    var err = preflightError();
+    if (err) { showChatError(err); return; }
+    showChatError(null);
+    var speakers = speakersForNextTurn();
+    if (!speakers.length) {
+      showChatError('Pick a persona (or a party of 2+) first.');
+      return;
+    }
+    setBusy(true);
+    try {
+      for (var i = 0; i < speakers.length; i++) {
+        if (!state.busy) break;
+        await generateOneReply(speakers[i]);
+      }
     } catch (e) {
       if (e.name !== 'AbortError') showChatError(e.message || String(e));
     } finally {
-      if (!msg.content) { var i = list.indexOf(msg); if (i >= 0) list.splice(i, 1); }
       state.controller = null;
       setBusy(false);
       saveChats();
@@ -463,16 +682,28 @@
     if (!text.trim()) return;
     var err = preflightError();
     if (err) { showChatError(err); return; }
+    if (isPartyMode()) {
+      if (!partyPersonas().length) { showChatError('Party has no valid characters.'); return; }
+    } else if (!activePersona()) {
+      showChatError('Pick a persona first.');
+      return;
+    }
     chat().push({ role: 'user', content: text });
     input.value = ''; autoGrow();
     saveChats();
+    renderMessages();
     generateReply();
   }
 
   function regenerate() {
     if (state.busy) return;
     var list = chat();
-    if (list.length && list[list.length - 1].role === 'assistant') list.pop();
+    if (isPartyMode()) {
+      // Drop trailing assistant turns after the last user message, then re-run party/direct replies.
+      while (list.length && list[list.length - 1].role === 'assistant') list.pop();
+    } else {
+      if (list.length && list[list.length - 1].role === 'assistant') list.pop();
+    }
     if (!list.some(function (m) { return m.role === 'user'; })) {
       showChatError('Nothing to regenerate yet.'); renderMessages(); return;
     }
@@ -482,19 +713,34 @@
 
   function clearChat() {
     if (state.busy) return;
-    if (!confirm('Clear this chat?')) return;
+    if (!confirm(isPartyMode() ? 'Clear this shared scene chat?' : 'Clear this chat?')) return;
     startChat(true);
   }
 
   function startChat(force) {
+    if (isPartyMode()) {
+      var key = partyKey();
+      if (force || !state.sceneChats[key]) {
+        state.sceneChats[key] = [];
+        partyPersonas().forEach(function (p) {
+          if (p.greeting && p.greeting.trim()) {
+            state.sceneChats[key].push({ role: 'assistant', content: p.greeting, personaId: p.id });
+          }
+        });
+        saveSceneChats();
+      }
+      showChatError(null);
+      renderMessages();
+      return;
+    }
     var p = activePersona();
     if (!p) return;
     if (force || !state.chats[p.id]) {
       state.chats[p.id] = [];
       if (p.greeting && p.greeting.trim()) {
-        state.chats[p.id].push({ role: 'assistant', content: p.greeting });
+        state.chats[p.id].push({ role: 'assistant', content: p.greeting, personaId: p.id });
       }
-      saveChats();
+      save(LS.chats, state.chats);
     }
     showChatError(null);
     renderMessages();
@@ -510,34 +756,118 @@
     var p = activePersona();
     var slot = $('header-avatar');
     slot.innerHTML = '';
-    if (p) slot.appendChild(makeAvatar(personaWithAvatar(p), 'md'));
-    $('header-name').textContent = p ? p.name : 'Crush Chat';
+    var chips = $('party-chips');
+    var title = currentSceneTitle();
+    if (isPartyMode()) {
+      slot.hidden = true;
+      $('header-name').textContent = title || ('Scene · ' + state.party.length + ' bots');
+      if (chips) {
+        chips.hidden = false;
+        chips.innerHTML = '';
+        partyPersonas().forEach(function (mem) {
+          var chip = document.createElement('button');
+          chip.type = 'button';
+          var en = effectiveName(mem);
+          chip.className = 'party-chip' + (state.directId === mem.id ? ' direct' : '');
+          chip.setAttribute('aria-pressed', state.directId === mem.id ? 'true' : 'false');
+          chip.title = state.directId === mem.id
+            ? (en + ' — only this bot replies next. Tap again to clear.')
+            : (en + ' — tap so only this bot replies next');
+          chip.appendChild(makeAvatar(personaWithAvatar(mem), 'sm'));
+          var label = document.createElement('span');
+          label.className = 'party-chip-name';
+          label.textContent = en;
+          chip.appendChild(label);
+          chip.onclick = function () { toggleDirect(mem.id); };
+          chips.appendChild(chip);
+        });
+      }
+    } else {
+      slot.hidden = false;
+      if (p) slot.appendChild(makeAvatar(personaWithAvatar(p), 'md'));
+      $('header-name').textContent = title || (p ? effectiveName(p) : 'Crush Chat');
+      if (chips) { chips.hidden = true; chips.innerHTML = ''; }
+    }
     $('model-tag').textContent = state.settings.model || '';
+  }
+
+  function toggleDirect(id) {
+    if (!isPartyMode()) return;
+    state.directId = state.directId === id ? null : id;
+    refreshHeader();
   }
 
   function renderPersonaPicker() {
     var picker = $('persona-picker');
     picker.innerHTML = '';
     state.personas.forEach(function (p) {
+      var inParty = state.party.indexOf(p.id) >= 0;
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'pick' + (p.id === state.activeId ? ' selected' : '');
+      btn.className = 'pick'
+        + (p.id === state.activeId ? ' selected' : '')
+        + (inParty ? ' in-party' : '');
       btn.setAttribute('role', 'option');
-      btn.setAttribute('aria-selected', p.id === state.activeId ? 'true' : 'false');
+      btn.setAttribute('aria-selected', inParty || p.id === state.activeId ? 'true' : 'false');
       btn.appendChild(makeAvatar(personaWithAvatar(p), 'lg'));
       var n = document.createElement('span');
       n.className = 'pick-name';
-      n.textContent = p.name;
+      n.textContent = effectiveName(p);
       btn.appendChild(n);
-      btn.onclick = function () { switchPersona(p.id); };
+      if (inParty) {
+        var badge = document.createElement('span');
+        badge.className = 'party-badge';
+        badge.textContent = 'In scene';
+        btn.appendChild(badge);
+      }
+      btn.onclick = function () { togglePartyMember(p.id); };
       picker.appendChild(btn);
     });
     var p = activePersona();
+    var partyNote = $('party-status');
+    if (partyNote) {
+      if (isPartyMode()) {
+        partyNote.textContent = 'Multi-bot ON (' + state.party.length + '): shared scene chat — each bot replies as its own character.';
+      } else if (state.party.length === 1) {
+        partyNote.textContent = '1 character selected — single-bot mode. Tap another to add to the scene (2+).';
+      } else {
+        partyNote.textContent = 'Tap 2+ characters to run a multi-bot scene. With 0–1 selected, chat uses the active character only.';
+      }
+    }
     $('persona-tagline').textContent = p ? (p.tagline || '') : '';
     var detail = $('persona-detail');
     if (p) {
       detail.textContent = [p.scenario, p.speaking_style].filter(Boolean).join('\n\n');
     } else detail.textContent = '';
+    fillCardEditor();
+  }
+
+  function togglePartyMember(id) {
+    if (!personaById(id)) return;
+    var idx = state.party.indexOf(id);
+    if (idx >= 0) state.party.splice(idx, 1);
+    else state.party.push(id);
+    state.party = normalizeParty(state.party);
+    saveParty();
+    state.activeId = id;
+    localStorage.setItem(LS.persona, id);
+    if (state.directId && state.party.indexOf(state.directId) < 0) state.directId = null;
+    if (!isPartyMode()) state.directId = null;
+    refreshHeader();
+    renderPersonaPicker();
+    fillPromptEditor();
+    renderGallery();
+    startChat(false);
+  }
+
+  function clearParty() {
+    if (state.busy) return;
+    state.party = [];
+    state.directId = null;
+    saveParty();
+    refreshHeader();
+    renderPersonaPicker();
+    startChat(false);
   }
 
   function switchPersona(id) {
@@ -547,8 +877,80 @@
     refreshHeader();
     renderPersonaPicker();
     fillPromptEditor();
+    fillCardEditor();
     renderGallery();
-    startChat(false);
+    if (!isPartyMode()) startChat(false);
+    else renderMessages();
+  }
+
+  function fillCardEditor() {
+    var p = activePersona();
+    var titleEl = $('sceneTitle');
+    if (titleEl) titleEl.value = currentSceneTitle();
+    if (!p) return;
+    var c = cardFor(p.id);
+    if ($('cardName')) $('cardName').value = c.name || p.name || '';
+    if ($('cardAppearance')) $('cardAppearance').value = c.appearance || '';
+    if ($('cardFetish')) $('cardFetish').value = c.fetish || '';
+    if ($('cardImage')) $('cardImage').value = effectiveAvatar(p) || '';
+    var prev = $('card-preview');
+    if (prev) {
+      prev.innerHTML = '';
+      prev.appendChild(makeAvatar(personaWithAvatar(p), 'lg'));
+    }
+    var label = $('card-editing');
+    if (label) label.textContent = 'Editing card: ' + effectiveName(p);
+  }
+
+  function setCardStatus(t) {
+    var el = $('cardStatus');
+    if (el) el.textContent = t || '';
+  }
+
+  function saveCardFromForm() {
+    var p = activePersona();
+    if (!p) return;
+    if ($('sceneTitle')) setSceneTitle($('sceneTitle').value);
+    var name = clean(($('cardName') && $('cardName').value) || '', 80);
+    var appearance = clean(($('cardAppearance') && $('cardAppearance').value) || '', 2000);
+    var fetish = clean(($('cardFetish') && $('cardFetish').value) || '', 2000);
+    var imgRaw = (($('cardImage') && $('cardImage').value) || '').trim();
+    if (imgRaw) {
+      var url = normalizeImageUrl(imgRaw);
+      if (!url) {
+        setCardStatus('Image URL must be http(s) to an image (.jpg .png .webp .gif .avif) or imgchest.com.');
+        return;
+      }
+      state.avatarOverrides[p.id] = url;
+    }
+    state.cardOverrides[p.id] = { name: name, appearance: appearance, fetish: fetish };
+    saveCardOverrides();
+    saveAvatarOverrides();
+    if ($('avatarUrl')) $('avatarUrl').value = effectiveAvatar(p);
+    if ($('promptAvatarUrl')) $('promptAvatarUrl').value = effectiveAvatar(p);
+    fillCardEditor();
+    refreshHeader();
+    renderPersonaPicker();
+    if (!state.promptOverrides[p.id]) {
+      var pt = $('promptText');
+      if (pt) pt.value = buildSystemPrompt(p);
+    }
+    setCardStatus('Card saved for ' + effectiveName(p) + ' ✔ (this browser only).');
+  }
+
+  function clearCardOverrides() {
+    var p = activePersona();
+    if (!p) return;
+    if (!confirm('Clear local name / appearance / fetish overrides for this character? (Image override cleared too.)')) return;
+    delete state.cardOverrides[p.id];
+    delete state.avatarOverrides[p.id];
+    saveCardOverrides();
+    saveAvatarOverrides();
+    fillCardEditor();
+    fillAvatarFields();
+    refreshHeader();
+    renderPersonaPicker();
+    setCardStatus('Card overrides cleared for ' + p.name + '.');
   }
 
   function fillAvatarFields() {
@@ -561,6 +963,7 @@
       prev.innerHTML = '';
       if (p) prev.appendChild(makeAvatar(personaWithAvatar(p), 'lg'));
     }
+    if ($('cardImage')) $('cardImage').value = url;
   }
 
   function setAvatarStatus(t) {
@@ -591,6 +994,7 @@
     state.avatarOverrides[p.id] = url;
     saveAvatarOverrides();
     fillAvatarFields();
+    fillCardEditor();
     refreshHeader();
     renderPersonaPicker();
     setAvatarStatus('Avatar saved for ' + p.name + ' ✔ (browser only — commit JSON on GitHub to share).');
@@ -614,7 +1018,7 @@
     sel.innerHTML = '';
     state.personas.forEach(function (p) {
       var o = document.createElement('option');
-      o.value = p.id; o.textContent = p.name;
+      o.value = p.id; o.textContent = effectiveName(p);
       sel.appendChild(o);
     });
     if (state.activeId) sel.value = state.activeId;
@@ -765,7 +1169,7 @@
       t.classList.toggle('active', t.getAttribute('data-view') === name);
     });
     if (name === 'chat') renderMessages();
-    if (name === 'personas') { renderPersonaPicker(); fillAvatarFields(); }
+    if (name === 'personas') { renderPersonaPicker(); fillAvatarFields(); fillCardEditor(); }
     if (name === 'prompt') fillPromptEditor();
     if (name === 'gallery') renderGallery();
     if (name === 'settings') renderSettings();
@@ -911,6 +1315,9 @@
     state.settings = Object.assign({}, DEFAULT_SETTINGS, load(LS.settings, {}) || {});
     if (!state.settings.model) state.settings.model = DEFAULT_SETTINGS.model;
     state.chats = load(LS.chats, {}) || {};
+    state.sceneChats = load(LS.sceneChats, {}) || {};
+    state.sceneTitles = load(LS.sceneTitles, {}) || {};
+    state.cardOverrides = load(LS.cardOverrides, {}) || {};
     state.promptOverrides = load(LS.promptOverrides, {}) || {};
     state.galleryOverlay = load(LS.galleryOverlay, {}) || {};
     state.galleryHidden = load(LS.galleryHidden, {}) || {};
@@ -925,6 +1332,9 @@
       state.activeId = (state.personas.find(function (p) { return p.id === 'default-assistant'; }) || state.personas[0]).id;
       localStorage.setItem(LS.persona, state.activeId);
     }
+
+    state.party = normalizeParty(load(LS.party, []) || []);
+    if (state.directId && state.party.indexOf(state.directId) < 0) state.directId = null;
 
     $('composer').addEventListener('submit', sendMessage);
     $('input').addEventListener('input', autoGrow);
@@ -1014,6 +1424,16 @@
     if ($('btnClearAvatar')) $('btnClearAvatar').onclick = clearAvatar;
     if ($('btnSavePromptAvatar')) $('btnSavePromptAvatar').onclick = function () { saveAvatarFromInput('promptAvatarUrl'); };
     if ($('btnClearPromptAvatar')) $('btnClearPromptAvatar').onclick = clearAvatar;
+    if ($('btnSaveCard')) $('btnSaveCard').onclick = saveCardFromForm;
+    if ($('btnClearCard')) $('btnClearCard').onclick = clearCardOverrides;
+    if ($('btnClearParty')) $('btnClearParty').onclick = clearParty;
+    if ($('sceneTitle')) {
+      $('sceneTitle').addEventListener('change', function () {
+        setSceneTitle(this.value);
+        refreshHeader();
+        setCardStatus('Scene title saved ✔');
+      });
+    }
 
     var picks = $('modelPicks');
     MODEL_PICKS.forEach(function (m) {
@@ -1061,6 +1481,7 @@
     refreshHeader();
     renderPersonaPicker();
     fillPromptEditor();
+    fillCardEditor();
     renderGallery();
     startChat(false);
     if (!state.settings.apiKey) {
@@ -1077,8 +1498,11 @@
     normalizeImageUrl: normalizeImageUrl,
     parseSSELine: parseSSELine,
     effectiveAvatar: effectiveAvatar,
+    effectiveName: effectiveName,
     mergedGallery: mergedGallery,
-    personaWithAvatar: personaWithAvatar
+    personaWithAvatar: personaWithAvatar,
+    isPartyMode: isPartyMode,
+    systemPromptFor: systemPromptFor
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootGate);

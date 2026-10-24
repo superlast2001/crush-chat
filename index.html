@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Crush Chat</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <div id="gate" class="gate">
@@ -32,6 +32,7 @@
         <span id="model-tag" class="tag"></span>
       </span>
     </div>
+    <div id="party-chips" class="party-chips" hidden aria-label="Scene characters"></div>
   </header>
 
   <!-- CHAT -->
@@ -49,17 +50,51 @@
     </form>
   </section>
 
-  <!-- PERSONAS -->
+  <!-- PERSONAS / CHARACTER CARDS -->
   <section id="view-personas" class="view">
     <div class="scroll">
-      <h2>Personas</h2>
-      <p class="note">Pick a character. Each keeps its own chat history in this browser. Edit JSON files in <code>personas/</code> on GitHub to change the defaults.</p>
-      <div id="persona-picker" class="picker" role="listbox" aria-label="Personas"></div>
+      <h2>Characters</h2>
+      <p class="note">Tap characters to build a multi-bot scene (2+). Each bot gets its own card and replies separately in one shared chat. With 0–1 selected, you chat with a single character as before.</p>
+      <div id="persona-picker" class="picker" role="listbox" aria-label="Characters"></div>
+      <p id="party-status" class="note"></p>
+      <div class="btn-row">
+        <button id="btnClearParty" class="btn small" type="button">Clear scene cast</button>
+      </div>
       <p id="persona-tagline" class="muted"></p>
       <div id="persona-detail" class="persona-detail muted small"></div>
 
-      <h2>Avatar image</h2>
-      <p class="note">Paste a direct https image link (Image Chest CDN, or any .jpg/.png/.webp/.gif). Shown in the picker and chat header. Saved in this browser; edit <code>personas/*.json</code> on GitHub to share.</p>
+      <h2>Scene title</h2>
+      <p class="note">Name this shared scene/story. Sent to every bot so they stay oriented.</p>
+      <label class="field">Title
+        <input id="sceneTitle" type="text" maxlength="120" placeholder="e.g. Family weekend at the cabin">
+      </label>
+
+      <h2>Character card</h2>
+      <p id="card-editing" class="note">Editing card: —</p>
+      <p class="note">Fill Name, Appearance, Image, and Sex fetish. Saved in this browser (localStorage). Appearance + image + fetish are injected into that bot’s system prompt so it knows the look immediately.</p>
+      <label class="field">Name
+        <input id="cardName" type="text" maxlength="80" autocomplete="off" placeholder="Character name">
+      </label>
+      <label class="field">Appearance <span class="muted">(must match the image — what the bot must know immediately)</span>
+        <textarea id="cardAppearance" rows="4" maxlength="2000" placeholder="Body, face, hair, clothes, age presentation (18+ adults only)…"></textarea>
+      </label>
+      <label class="field">Image URL (portrait)
+        <input id="cardImage" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://cdn.imgchest.com/files/….png">
+      </label>
+      <div class="avatar-preview-row">
+        <span id="card-preview" class="avatar-slot"></span>
+      </div>
+      <label class="field">Sex fetish <span class="muted">(kinks / preferences for this character — adults 18+ only)</span>
+        <textarea id="cardFetish" rows="3" maxlength="2000" placeholder="e.g. taboo family roleplay, mind control, …"></textarea>
+      </label>
+      <div class="btn-row">
+        <button id="btnSaveCard" class="btn primary" type="button">Save card</button>
+        <button id="btnClearCard" class="btn" type="button">Clear card overrides</button>
+      </div>
+      <p id="cardStatus" class="note"></p>
+
+      <h2>Avatar image (shortcut)</h2>
+      <p class="note">Same as Image on the card. Direct https image link (.jpg/.png/.webp/.gif or imgchest).</p>
       <label class="field">Avatar URL
         <input id="avatarUrl" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://cdn.imgchest.com/files/….png">
       </label>
@@ -120,7 +155,7 @@
         <input id="model" type="text" autocapitalize="off" spellcheck="false" placeholder="openrouter/free">
       </label>
       <div id="modelPicks" class="chips"></div>
-      <p class="note">Default is <code>openrouter/free</code>. Free models may refuse NSFW. Models like Euryale need OpenRouter credit (paid).</p>
+      <p class="note">Default is <code>openrouter/free</code>. Free models often refuse NSFW or go vague/dumb mid-scene. For vivid multi-bot adult roleplay, prefer a capable paid model such as <code>sao10k/l3.1-euryale-70b</code> (needs OpenRouter credit). Your saved key/model are never changed automatically.</p>
       <label class="field">Intensity
         <select id="intensity">
           <option value="soft">Soft (same as Max)</option>
@@ -164,7 +199,7 @@
 
   <nav class="tabbar">
     <button data-view="chat" class="tab active" type="button">💬<span>Chat</span></button>
-    <button data-view="personas" class="tab" type="button">🎭<span>Personas</span></button>
+    <button data-view="personas" class="tab" type="button">🎭<span>Cards</span></button>
     <button data-view="prompt" class="tab" type="button">📝<span>Prompt</span></button>
     <button data-view="settings" class="tab" type="button">⚙️<span>Settings</span></button>
     <button data-view="gallery" class="tab" type="button">🖼<span>Gallery</span></button>
@@ -177,7 +212,7 @@
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 
-<script src="render.js?v=2"></script>
-<script src="app.js?v=2"></script>
+<script src="render.js?v=3"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>
