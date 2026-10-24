@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Crush Chat</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <div id="gate" class="gate">
@@ -86,6 +86,9 @@
         </div>
         <label class="field field-big">Story title
           <input id="sceneTitle" type="text" maxlength="120" placeholder="e.g. Family weekend at the cabin">
+        </label>
+        <label class="field">World setting <span class="muted">(shared by every bot in this story)</span>
+          <textarea id="storyWorldSetting" rows="4" maxlength="4000" placeholder="What already happened, where you are, rules of this world… all bots in this story will read this."></textarea>
         </label>
         <p id="party-status" class="note"></p>
 
@@ -263,7 +266,7 @@
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 
-<script src="render.js?v=8"></script>
-<script src="app.js?v=8"></script>
+<script src="render.js?v=9"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

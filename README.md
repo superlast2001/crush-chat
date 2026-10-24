@@ -35,10 +35,11 @@ Bottom nav: **Stories | Chat | Settings | Prompt | Gallery**.
 **Stories is the homepage** — big cards, ＋ Create, tap a card to edit bots.
 
 1. **Stories → ＋ Create** — name the story.
-2. **Add bot** — Name, Appearance, optional portrait (paste an **Imgchest** URL; or optional Pick from phone).
-3. **Fetish tags** — tap chips (size difference, himbo, mind control, somno, CNC, etc.). Selected tags inject into that bot’s system prompt. Free models may still refuse NSFW. 18+ only.
-4. **Images + triggers** — Paste an **Imgchest** image URL (including animated `.gif`) + phrases (e.g. `ares cum`). Matching chat text shows the image (GIFs animate). Optional: Pick from phone.
-5. **Open Chat** — multi-bot shared chat; each bot replies as itself.
+2. **World setting** — optional shared scene/backstory text; every bot in that story gets it in their system prompt so they know what already happened.
+3. **Add bot** — Name, Appearance, optional portrait (paste an **Imgchest** URL; or optional Pick from phone).
+4. **Fetish tags** — tap chips (size difference, himbo, mind control, somno, CNC, etc.). Selected tags inject into that bot’s system prompt. Free models may still refuse NSFW. 18+ only.
+5. **Images + triggers** — Paste an **Imgchest** image URL (including animated `.gif`) + phrases (e.g. `ares cum`). Matching chat text shows the image (GIFs animate). Optional: Pick from phone.
+6. **Open Chat** — multi-bot shared chat; each bot replies as itself.
 
 Everything saves in this browser (`cchat_` localStorage). Optional preset templates can seed a bot; they are not the main flow.
 

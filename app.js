@@ -470,6 +470,7 @@
     return {
       id: id,
       title: clean(raw && raw.title, 120) || 'Untitled story',
+      worldSetting: clean(raw && raw.worldSetting, 4000),
       bots: bots
     };
   }
@@ -655,6 +656,13 @@
     }
   }
 
+  function worldSettingBlock() {
+    var s = activeStory();
+    var ws = s && typeof s.worldSetting === 'string' ? s.worldSetting.trim() : '';
+    if (!ws) return '';
+    return 'WORLD / SCENE SETTING:\n' + ws + '\nAll bots in this story share this setting. Treat it as what already happened / where you are / the rules of this world. Stay consistent with it.';
+  }
+
   function systemPromptFor(persona) {
     var p = persona || activePersona();
     if (!p) return state.libText;
@@ -681,6 +689,8 @@
     if (tagsC.length) lines.push('Fetishes: ' + fetishPromptLines(tagsC).map(function (l) { return l.replace(/^\- /, ''); }).join('; '));
     if (fetish) lines.push('Sex fetish notes: ' + fetish);
     lines.push('Stay in character as ONLY this person. Never speak for the user. Do not go vague or OOC-dumb.');
+    var world = worldSettingBlock();
+    if (world) lines.push(world);
     return lines.join('\n');
   }
 
@@ -757,6 +767,8 @@
     if (title) {
       parts.push('SCENE TITLE: ' + title + '\nYou are in this named scene. Keep continuity with the title and prior turns.');
     }
+    var world = worldSettingBlock();
+    if (world) parts.push(world);
     parts.push(personaBlock(p));
     return parts.filter(Boolean).join('\n\n');
   }
@@ -1439,6 +1451,7 @@
     var s = activeStory();
     if (!s) return;
     if ($('sceneTitle')) s.title = clean($('sceneTitle').value, 120) || 'Untitled story';
+    if ($('storyWorldSetting')) s.worldSetting = clean($('storyWorldSetting').value, 4000);
     saveStories();
     syncPersonasFromStory();
     refreshHeader();
@@ -1449,6 +1462,8 @@
     var s = activeStory();
     var titleEl = $('sceneTitle');
     if (titleEl) titleEl.value = s ? (s.title || '') : '';
+    var worldEl = $('storyWorldSetting');
+    if (worldEl) worldEl.value = s ? (s.worldSetting || '') : '';
     var partyNote = $('party-status');
     if (partyNote) {
       if (!s) partyNote.textContent = '';
