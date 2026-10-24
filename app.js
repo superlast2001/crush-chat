@@ -42,24 +42,92 @@
   var FETISH_CATALOG = [
     { id: 'size-diff', label: 'Size difference', prompt: 'size difference (clear physical size gap)' },
     { id: 'height-diff', label: 'Height difference', prompt: 'height difference (taller/shorter gap)' },
+    { id: 'muscle-diff', label: 'Muscle difference', prompt: 'muscle / strength difference' },
+    { id: 'age-gap', label: 'Age gap (18+)', prompt: 'adult age gap roleplay (all characters 18+)' },
+    { id: 'himbo', label: 'Himbo', prompt: 'himbo (hot, sweet, dumb/airheaded masculine energy)' },
+    { id: 'bimbo', label: 'Bimbo', prompt: 'bimbo (hot, sweet, airheaded feminine energy)' },
+    { id: 'mind-control', label: 'Mind control', prompt: 'mind control / hypnosis / brainwash kink' },
+    { id: 'hypnosis', label: 'Hypnosis', prompt: 'hypnosis / trance kink' },
+    { id: 'possession', label: 'Possession', prompt: 'possession / body control kink' },
+    { id: 'corruption', label: 'Corruption', prompt: 'corruption kink' },
+    { id: 'brainwash', label: 'Brainwash', prompt: 'brainwashing kink' },
     { id: 'somno', label: 'Somnophilia', prompt: 'somnophilia / somno (asleep partner, adults 18+)' },
     { id: 'cnc', label: 'CNC', prompt: 'CNC (consensual non-consent roleplay, adults 18+)' },
     { id: 'unconscious', label: 'Unconscious', prompt: 'unconscious (erotic fiction, adults 18+ only)' },
     { id: 'necro', label: 'Necrophilia', prompt: 'necrophilia fiction (all characters portrayed adult 18+)' },
     { id: 'incest', label: 'Incest / taboo', prompt: 'incest / taboo family roleplay (all 18+ adults)' },
-    { id: 'mind-control', label: 'Mind control', prompt: 'mind control / hypnosis kink' },
+    { id: 'stepfamily', label: 'Stepfamily', prompt: 'stepfamily taboo roleplay (all 18+)' },
     { id: 'breeding', label: 'Breeding', prompt: 'breeding / impregnation kink' },
-    { id: 'noncon-play', label: 'Noncon play', prompt: 'noncon fantasy play between consenting adults' },
-    { id: 'dom-sub', label: 'Dom / sub', prompt: 'D/s power exchange' },
-    { id: 'petplay', label: 'Pet play', prompt: 'pet play' },
-    { id: 'voyeur', label: 'Voyeur', prompt: 'voyeurism' },
-    { id: 'exhibition', label: 'Exhibition', prompt: 'exhibitionism' },
-    { id: 'corruption', label: 'Corruption', prompt: 'corruption kink' },
+    { id: 'pregnancy', label: 'Pregnancy', prompt: 'pregnancy kink' },
+    { id: 'lactation', label: 'Lactation', prompt: 'lactation kink' },
     { id: 'freeuse', label: 'Free use', prompt: 'free use' },
     { id: 'public', label: 'Public', prompt: 'public / risky sex' },
+    { id: 'exhibition', label: 'Exhibition', prompt: 'exhibitionism' },
+    { id: 'voyeur', label: 'Voyeur', prompt: 'voyeurism' },
+    { id: 'dom-sub', label: 'Dom / sub', prompt: 'D/s power exchange' },
+    { id: 'femdom', label: 'Femdom', prompt: 'female domination' },
+    { id: 'maledom', label: 'Maledom', prompt: 'male domination' },
+    { id: 'switch', label: 'Switch', prompt: 'switch / flexible power' },
+    { id: 'petplay', label: 'Pet play', prompt: 'pet play' },
+    { id: 'master-slave', label: 'Master / slave', prompt: 'Master/slave dynamic (adults 18+)' },
+    { id: 'bondage', label: 'Bondage', prompt: 'bondage / restraint' },
+    { id: 'impact', label: 'Impact', prompt: 'impact play / spanking' },
+    { id: 'choking', label: 'Choking', prompt: 'breath play / choking (fiction)' },
+    { id: 'degradation', label: 'Degradation', prompt: 'degradation / humiliation kink' },
+    { id: 'praise', label: 'Praise', prompt: 'praise kink' },
+    { id: 'jealousy', label: 'Jealousy', prompt: 'jealousy / possessive kink' },
+    { id: 'cheating', label: 'Cheating', prompt: 'cheating / affair fantasy (adults)' },
+    { id: 'cuckold', label: 'Cuckold', prompt: 'cuckold / hotwife dynamic' },
+    { id: 'ntr', label: 'NTR', prompt: 'NTR / netorare fantasy' },
+    { id: 'threesome', label: 'Threesome', prompt: 'threesome / group' },
+    { id: 'gangbang', label: 'Gangbang', prompt: 'gangbang' },
+    { id: 'orc', label: 'Orc / beast', prompt: 'orc / beastman partner (fiction)' },
     { id: 'monster', label: 'Monster', prompt: 'monster / non-human partner (fiction)' },
     { id: 'tentacles', label: 'Tentacles', prompt: 'tentacles' },
-    { id: 'transformation', label: 'Transformation', prompt: 'transformation / TF' }
+    { id: 'transformation', label: 'Transformation', prompt: 'transformation / TF' },
+    { id: 'furry', label: 'Furry', prompt: 'furry / anthro (adult)' },
+    { id: 'vampire', label: 'Vampire', prompt: 'vampire kink' },
+    { id: 'werewolf', label: 'Werewolf', prompt: 'werewolf / knot kink' },
+    { id: 'alien', label: 'Alien', prompt: 'alien partner (fiction)' },
+    { id: 'robot', label: 'Robot / android', prompt: 'robot / android partner' },
+    { id: 'giant', label: 'Giant / tiny', prompt: 'giant/tiny size play (macro/micro)' },
+    { id: 'inflation', label: 'Inflation', prompt: 'inflation kink' },
+    { id: 'watersports', label: 'Watersports', prompt: 'watersports' },
+    { id: 'scat', label: 'Scat', prompt: 'scat kink' },
+    { id: 'blood', label: 'Blood play', prompt: 'blood play (fiction)' },
+    { id: 'knife', label: 'Knife play', prompt: 'knife play (fiction)' },
+    { id: 'drugs', label: 'Drugged', prompt: 'drugged / intoxicated play (fiction, adults 18+)' },
+    { id: 'drunk', label: 'Drunk', prompt: 'drunk sex fantasy (adults 18+)' },
+    { id: 'sleepsex', label: 'Sleep sex', prompt: 'sleep sex (somno-adjacent, adults 18+)' },
+    { id: 'blackmail', label: 'Blackmail', prompt: 'blackmail kink (fiction)' },
+    { id: 'kidnap', label: 'Kidnap play', prompt: 'kidnap / captivity fantasy (CNC-adjacent, adults 18+)' },
+    { id: 'teacher', label: 'Teacher / student', prompt: 'teacher/student roleplay (all characters adults 18+)' },
+    { id: 'boss', label: 'Boss / employee', prompt: 'boss/employee power kink (adults)' },
+    { id: 'doctor', label: 'Doctor / patient', prompt: 'doctor/patient roleplay (adults 18+)' },
+    { id: 'uniform', label: 'Uniform', prompt: 'uniform kink' },
+    { id: 'lingerie', label: 'Lingerie', prompt: 'lingerie focus' },
+    { id: 'feet', label: 'Feet', prompt: 'foot fetish' },
+    { id: 'armpit', label: 'Armpit', prompt: 'armpit fetish' },
+    { id: 'musk', label: 'Musk', prompt: 'musk / scent kink' },
+    { id: 'body-hair', label: 'Body hair', prompt: 'body hair appreciation' },
+    { id: 'chubby', label: 'Chubby / soft', prompt: 'chubby / soft body appreciation' },
+    { id: 'muscle-worship', label: 'Muscle worship', prompt: 'muscle worship' },
+    { id: 'cock-worship', label: 'Cock worship', prompt: 'cock worship' },
+    { id: 'ass-worship', label: 'Ass worship', prompt: 'ass worship' },
+    { id: 'oral', label: 'Oral focus', prompt: 'oral fixation / oral focus' },
+    { id: 'anal', label: 'Anal', prompt: 'anal focus' },
+    { id: 'rimming', label: 'Rimming', prompt: 'rimming' },
+    { id: 'toys', label: 'Toys', prompt: 'sex toys' },
+    { id: 'edging', label: 'Edging', prompt: 'edging / orgasm control' },
+    { id: 'denial', label: 'Denial', prompt: 'orgasm denial' },
+    { id: 'overstim', label: 'Overstim', prompt: 'overstimulation' },
+    { id: 'aftercare', label: 'Aftercare', prompt: 'aftercare (still explicit when asked)' },
+    { id: 'romance', label: 'Romance + smut', prompt: 'romantic intimacy mixed with explicit sex' },
+    { id: 'enemies', label: 'Enemies to lovers', prompt: 'enemies-to-lovers tension' },
+    { id: 'yandere', label: 'Yandere', prompt: 'yandere / obsessive love' },
+    { id: 'tsundere', label: 'Tsundere', prompt: 'tsundere dynamic' },
+    { id: 'netori', label: 'Netori', prompt: 'netori (stealing) fantasy' },
+    { id: 'adult-only', label: 'Adults only (lock)', prompt: 'ALL characters must remain clearly adult 18+; never childlike' }
   ];
 
   var INTENSITIES = ['soft', 'normal', 'max'];
@@ -114,8 +182,20 @@
     catch (e) { return fallback; }
   }
   function save(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); }
-    catch (e) { showChatError('Could not save to localStorage: ' + e.message); }
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+      return true;
+    } catch (e) {
+      var quota = e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014);
+      var msg = quota
+        ? 'image too large — try a smaller photo'
+        : ('Could not save to localStorage: ' + (e && e.message ? e.message : e));
+      try { showChatError(msg); } catch (_) {}
+      try { setCardStatus(msg); } catch (_) {}
+      var gs = document.getElementById('gallery-status');
+      if (gs) { gs.textContent = msg; gs.className = 'small err'; }
+      return false;
+    }
   }
   function normalizeIntensity(v) {
     var k = typeof v === 'string' ? v.trim().toLowerCase() : '';
@@ -124,16 +204,105 @@
   function clean(v, max) {
     return typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max) : '';
   }
+  var MAX_DATA_URL_LEN = 1800000; /* ~1.8MB after compress */
+  var MAX_IMAGE_EDGE = 1280;
+  var IMAGE_QUALITY = 0.7;
+  var DATA_IMAGE_RE = /^data:image\/(png|jpe?g|webp|gif);base64,([A-Za-z0-9+\/=]+)$/i;
+
   function normalizeImageUrl(value) {
     if (typeof value !== 'string') return null;
     var s = value.trim();
-    if (!s || s.length > 2000 || /[\s<>"'`\\]/.test(s)) return null;
+    if (!s) return null;
+    /* Phone / local picks stored as data URLs in the same fields as http(s) URLs */
+    if (/^data:image\//i.test(s)) {
+      var compact = s.replace(/\s+/g, '');
+      if (compact.length > MAX_DATA_URL_LEN) return null;
+      var dm = DATA_IMAGE_RE.exec(compact);
+      if (!dm) return null;
+      var sub = dm[1].toLowerCase();
+      if (sub === 'jpg') sub = 'jpeg';
+      return 'data:image/' + sub + ';base64,' + dm[2];
+    }
+    if (s.length > 2000 || /[\s<>"'`\\]/.test(s)) return null;
     var u;
     try { u = new URL(s); } catch (_) { return null; }
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
     if (u.username || u.password) return null;
     if (!IMG_EXT.test(u.pathname) && !IMGCHEST_HOST.test(u.hostname)) return null;
     return u.href;
+  }
+
+  /** Resize/compress a picked File → data URL (JPEG/WebP ~0.7, max edge 1280). */
+  function compressImageFile(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//i.test(file.type || '')) {
+        reject(new Error('Pick an image photo'));
+        return;
+      }
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('Could not read photo')); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var w = img.naturalWidth || img.width || 1;
+          var h = img.naturalHeight || img.height || 1;
+          var scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(w, h));
+          var cw = Math.max(1, Math.round(w * scale));
+          var ch = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = cw;
+          canvas.height = ch;
+          var ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('Could not process photo')); return; }
+          ctx.drawImage(img, 0, 0, cw, ch);
+          var dataUrl = '';
+          try {
+            dataUrl = canvas.toDataURL('image/webp', IMAGE_QUALITY);
+            if (!/^data:image\/webp;base64,/i.test(dataUrl)) {
+              dataUrl = canvas.toDataURL('image/jpeg', IMAGE_QUALITY);
+            }
+          } catch (_) {
+            try { dataUrl = canvas.toDataURL('image/jpeg', IMAGE_QUALITY); }
+            catch (e2) { reject(new Error('Could not compress photo')); return; }
+          }
+          if (!dataUrl || dataUrl.length > MAX_DATA_URL_LEN) {
+            reject(new Error('image too large — try a smaller photo'));
+            return;
+          }
+          var ok = normalizeImageUrl(dataUrl);
+          if (!ok) {
+            reject(new Error('image too large — try a smaller photo'));
+            return;
+          }
+          resolve(ok);
+        };
+        img.onerror = function () { reject(new Error('Could not decode photo')); };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Wire a hidden <input type="file" accept="image/*"> + button → fill target input with data URL. */
+  function wireImagePick(btn, fileInput, targetInput, statusFn) {
+    if (!btn || !fileInput || !targetInput) return;
+    btn.onclick = function () {
+      fileInput.value = '';
+      fileInput.click();
+    };
+    fileInput.onchange = function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      if (statusFn) statusFn('Compressing photo…');
+      compressImageFile(file).then(function (dataUrl) {
+        targetInput.value = dataUrl;
+        if (statusFn) statusFn('Photo ready ✔ — Save to keep it on this phone.');
+        try { targetInput.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+      }).catch(function (err) {
+        var msg = (err && err.message) || 'Could not use that photo';
+        if (statusFn) statusFn(msg);
+      });
+    };
   }
   function cleanGallery(arr) {
     if (!Array.isArray(arr)) return [];
