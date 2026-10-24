@@ -884,20 +884,26 @@
     }
   }
 
+  function enterApp() {
+    try { localStorage.setItem(LS.age, '1'); } catch (_) {}
+    $('gate').hidden = true;
+    $('app').hidden = false;
+    Promise.resolve(init()).catch(function (e) {
+      console.error(e);
+      showChatError('Startup failed: ' + (e && e.message ? e.message : e));
+    });
+  }
+
   function bootGate() {
-    if (localStorage.getItem(LS.age) === '1') {
-      $('gate').hidden = true;
-      $('app').hidden = false;
-      return init();
+    var ageOk = false;
+    try { ageOk = localStorage.getItem(LS.age) === '1'; } catch (_) {}
+    if (ageOk) {
+      enterApp();
+      return;
     }
     $('gate').hidden = false;
     $('app').hidden = true;
-    $('gate-yes').onclick = function () {
-      localStorage.setItem(LS.age, '1');
-      $('gate').hidden = true;
-      $('app').hidden = false;
-      init();
-    };
+    $('gate-yes').onclick = enterApp;
     $('gate-no').onclick = function () { location.href = 'about:blank'; };
   }
 
@@ -923,8 +929,9 @@
     $('composer').addEventListener('submit', sendMessage);
     $('input').addEventListener('input', autoGrow);
     $('input').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) {
-        e.preventDefault(); sendMessage();
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
       }
     });
     $('btnRegen').onclick = regenerate;
