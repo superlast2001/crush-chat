@@ -359,3 +359,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); }
   .explore-title { font-size: 24px; }
   .story-tile-title { font-size: 14px; }
 }
+
+/* Phone-first optional pick next to Imgchest URL fields */
+.pick-row { margin: 6px 0 4px; }
+.pick-row .btn { flex: 0 1 auto; }
+.bot-image-pick { margin: 4px 0 0; }
+.bot-image-row .img-url-hint { margin: 4px 0 0; font-size: 12px; color: var(--muted); }

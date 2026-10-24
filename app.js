@@ -223,6 +223,7 @@
       if (sub === 'jpg') sub = 'jpeg';
       return 'data:image/' + sub + ';base64,' + dm[2];
     }
+    /* Imgchest / hosted URLs (primary path). .gif on cdn.imgchest.com animates via <img src>. */
     if (s.length > 2000 || /[\s<>"'`\\]/.test(s)) return null;
     var u;
     try { u = new URL(s); } catch (_) { return null; }
@@ -1613,14 +1614,33 @@
     row.className = 'bot-image-row';
     var urlLab = document.createElement('label');
     urlLab.className = 'field';
-    urlLab.textContent = 'Image URL';
+    urlLab.innerHTML = 'Image URL <span class="muted">(Imgchest — .gif animates in chat)</span>';
     var urlIn = document.createElement('input');
-    urlIn.type = 'url';
+    urlIn.type = 'text';
     urlIn.inputMode = 'url';
+    urlIn.autocapitalize = 'off';
+    urlIn.spellcheck = false;
     urlIn.setAttribute('data-img-url', '1');
-    urlIn.placeholder = 'https://cdn.imgchest.com/files/….png';
+    urlIn.placeholder = 'https://cdn.imgchest.com/files/….gif';
     urlIn.value = (img && img.url) || '';
     urlLab.appendChild(urlIn);
+    var hint = document.createElement('p');
+    hint.className = 'img-url-hint';
+    hint.textContent = 'Paste cdn.imgchest.com … .gif/.png (preferred). Animated GIFs play when the trigger matches.';
+    urlLab.appendChild(hint);
+    var pickRow = document.createElement('div');
+    pickRow.className = 'btn-row pick-row bot-image-pick';
+    var pickBtn = document.createElement('button');
+    pickBtn.type = 'button';
+    pickBtn.className = 'btn small';
+    pickBtn.textContent = '📷 Pick from phone (optional)';
+    var fileIn = document.createElement('input');
+    fileIn.type = 'file';
+    fileIn.accept = 'image/*';
+    fileIn.hidden = true;
+    pickRow.appendChild(pickBtn);
+    pickRow.appendChild(fileIn);
+    wireImagePick(pickBtn, fileIn, urlIn, setCardStatus);
     var trigLab = document.createElement('label');
     trigLab.className = 'field';
     trigLab.innerHTML = 'Triggers / keypoints <span class="muted">(comma-separated — e.g. ares cum, orgasm)</span>';
@@ -1644,6 +1664,7 @@
     };
     actions.appendChild(rm);
     row.appendChild(urlLab);
+    row.appendChild(pickRow);
     row.appendChild(trigLab);
     row.appendChild(actions);
     return row;
@@ -1766,7 +1787,7 @@
     if (imgRaw) {
       avatar = normalizeImageUrl(imgRaw);
       if (!avatar) {
-        setCardStatus('Portrait URL must be http(s) image (.jpg .png .webp .gif .avif) or imgchest.com.');
+        setCardStatus('Portrait: paste an Imgchest http(s) image URL (.jpg .png .webp .gif .avif or imgchest.com), or use Pick from phone.');
         return;
       }
     }
@@ -1781,11 +1802,11 @@
         var rawUrl = urlEl ? urlEl.value.trim() : '';
         var rawTrig = trigEl ? trigEl.value.trim() : '';
         if (rawUrl && !normalizeImageUrl(rawUrl)) {
-          setCardStatus('Image ' + (i + 1) + ': URL must be http(s) image or imgchest.com.');
+          setCardStatus('Image ' + (i + 1) + ': paste an Imgchest http(s) URL (.gif animates) or use Pick from phone.');
           return;
         }
         if (rawTrig && !rawUrl) {
-          setCardStatus('Image ' + (i + 1) + ': add an Image URL for those triggers.');
+          setCardStatus('Image ' + (i + 1) + ': add an Imgchest URL (or Pick from phone) for those triggers.');
           return;
         }
       }
@@ -1847,7 +1868,7 @@
     }
     var url = normalizeImageUrl(raw);
     if (!url) {
-      setAvatarStatus('URL must be http(s) to an image (.jpg .png .webp .gif .avif) or imgchest.com.');
+      setAvatarStatus('Paste an Imgchest http(s) image URL (.jpg .png .webp .gif .avif or imgchest.com), or pick from phone on the bot editor.');
       setPromptStatus('Invalid avatar URL.');
       return;
     }
@@ -2266,7 +2287,7 @@
       var url = normalizeImageUrl($('gallery-url').value);
       var status = $('gallery-status');
       if (!url) {
-        status.textContent = 'URL must be http(s) to an image (.jpg .png .webp .gif .avif) or imgchest.com.';
+        status.textContent = 'Paste an Imgchest http(s) image URL (.gif/.png/… or imgchest.com), or use Pick from phone.';
         status.className = 'small err';
         return;
       }
@@ -2309,6 +2330,13 @@
     if ($('btnAddBot')) $('btnAddBot').onclick = addBot;
     if ($('btnRemoveBot')) $('btnRemoveBot').onclick = removeEditingBot;
     if ($('btnAddBotImage')) $('btnAddBotImage').onclick = addBotImageRow;
+    wireImagePick($('btnPickPortrait'), $('cardImageFile'), $('cardImage'), setCardStatus);
+    wireImagePick($('btnPickGallery'), $('galleryImageFile'), $('gallery-url'), function (t) {
+      var status = $('gallery-status');
+      if (!status) return;
+      status.textContent = t || '';
+      status.className = /✔|ready/i.test(t || '') ? 'small ok' : (/large|Could|Pick|decode|read|compress/i.test(t || '') ? 'small err' : 'small');
+    });
     if ($('btnSaveStory')) $('btnSaveStory').onclick = saveStoryMeta;
     if ($('btnGoChat')) $('btnGoChat').onclick = function () {
       saveStoryMeta();

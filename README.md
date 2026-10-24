@@ -35,9 +35,9 @@ Bottom nav: **Stories | Chat | Settings | Prompt | Gallery**.
 **Stories is the homepage** — big cards, ＋ Create, tap a card to edit bots.
 
 1. **Stories → ＋ Create** — name the story.
-2. **Add bot** — Name, Appearance, optional portrait URL.
-3. **Fetish tags** — tap chips (size difference, somno, CNC, etc.). Selected tags inject into that bot’s system prompt. Free models may still refuse NSFW.
-4. **Images + triggers** — Image URL + phrases (e.g. `ares cum`). Matching chat text shows the image.
+2. **Add bot** — Name, Appearance, optional portrait (paste an **Imgchest** URL; or optional Pick from phone).
+3. **Fetish tags** — tap chips (size difference, himbo, mind control, somno, CNC, etc.). Selected tags inject into that bot’s system prompt. Free models may still refuse NSFW. 18+ only.
+4. **Images + triggers** — Paste an **Imgchest** image URL (including animated `.gif`) + phrases (e.g. `ares cum`). Matching chat text shows the image (GIFs animate). Optional: Pick from phone.
 5. **Open Chat** — multi-bot shared chat; each bot replies as itself.
 
 Everything saves in this browser (`cchat_` localStorage). Optional preset templates can seed a bot; they are not the main flow.
@@ -62,24 +62,26 @@ Everything saves in this browser (`cchat_` localStorage). Optional preset templa
 - Persona avatar in the header.
 - If the model writes an image URL (http(s), image extension or imgchest), it shows inline.
 
-## 6. Avatars and gallery (Image Chest links)
+## 6. Avatars, triggers, and gallery (Imgchest first)
 
-Crush Chat never uploads or hosts images — **links only**. Your browser loads them directly (`referrerpolicy=no-referrer`).
+Crush Chat does **not** upload images to a server. Preferred path: paste an [Image Chest](https://imgchest.com) **direct** link; your browser loads it (`referrerpolicy=no-referrer`). Optional: **Pick from phone** stores a compressed `data:` photo in this browser’s localStorage only.
 
-### Upload once, paste the direct link
-1. Upload an image you own (fictional adult characters only) to [Image Chest](https://imgchest.com) or any image host.
-2. Copy the **direct** file URL, e.g. `https://cdn.imgchest.com/files/xxxx.png` (must be http/https and end in `.jpg` / `.jpeg` / `.png` / `.webp` / `.gif` / `.avif`, or use an `imgchest.com` host).
+### Imgchest URL (recommended — works for animated GIF)
+1. Upload an image you own (**fictional adult / 18+ characters only**) to [Image Chest](https://imgchest.com).
+2. Copy the **direct** file URL, e.g. `https://cdn.imgchest.com/files/xxxx.gif` or `.png` (http/https ending in `.jpg` / `.jpeg` / `.png` / `.webp` / `.gif` / `.avif`, or any `imgchest.com` / `cdn.imgchest.com` host).
 3. Paste it into:
-   - **Personas** or **Prompt** tab → **Avatar URL** → Save (shown in picker + chat header), or
-   - **Gallery** tab → URL + optional caption/tag → **Add to gallery** (tap image to zoom; **Remove** drops it in this browser).
-4. To share with everyone, put the same URL in the persona JSON on GitHub:
-   - `"avatar": "https://cdn.imgchest.com/files/xxxx.png"`
-   - `"gallery": [{ "url": "https://…", "caption": "…", "tag": "…" }]`
+   - **Stories → Edit bot → Portrait image URL**, or **Images + triggers** rows, or
+   - **Gallery** tab → URL + optional caption/tag → **Add to gallery**.
+4. **Animated `.gif`:** keep the Imgchest URL. When a trigger phrase matches in chat, the GIF plays in the bubble (same for lightbox).
+5. To share with everyone, put the same URL in persona JSON on GitHub (`avatar` / `gallery`).
 
-Local avatar/gallery edits stay in this browser until you commit. Do not paste images of real people into sexual contexts (hard rules still apply in the prompt).
+### Pick from phone (optional)
+On the bot editor and gallery, tap **Pick from phone** → choose a photo → it is resized (~1280px) and saved as a compressed image in localStorage. If storage is full you’ll see *image too large — try a smaller photo*. Phone picks do **not** keep GIF animation (use an Imgchest `.gif` URL for that).
+
+Local avatar/gallery/bot image edits stay in this browser until you commit. Do not paste images of real people into sexual contexts (hard rules still apply in the prompt).
 
 ### Inline images in chat
-If the model writes an image URL in a reply, Crush Chat renders it as an inline image (same URL rules as above).
+If the model writes an image URL in a reply, Crush Chat renders it inline (same URL rules). Trigger images use the URLs you saved on the bot.
 
 ## Files
 - `index.html`, `style.css`, `app.js`, `render.js` — the app (no build step)

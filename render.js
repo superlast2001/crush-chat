@@ -1,4 +1,4 @@
-// Safe message rendering: never builds markup from strings. Text goes in via text nodes; images only for validated http(s) URLs.
+// Safe message rendering: never builds markup from strings. Text goes in via text nodes; images only for validated http(s) / data:image URLs.
 // Works in the browser (window.PersonaRender) and in Node (module.exports) so it can be unit-tested.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -10,11 +10,24 @@
   var IMGCHEST_HOST = /(^|\.)imgchest\.com$/i;
   var URL_RE = /https?:\/\/[^\s<>"'`\\]+/gi;
 
-  // Returns a normalised http(s) image URL, or null.
+  var DATA_IMAGE_RE = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+\/=]+$/i;
+  var MAX_DATA_URL_LEN = 1800000;
+
+  // Returns a normalised image URL (http(s) Imgchest/ext, or data:image), or null.
+  // Imgchest .gif links stay as https so the browser animates them in <img>.
   function imageUrl(raw) {
-    if (typeof raw !== 'string' || raw.length > 2000) return null;
+    if (typeof raw !== 'string') return null;
+    var s = raw.trim();
+    if (!s) return null;
+    if (/^data:image\//i.test(s)) {
+      var compact = s.replace(/\s+/g, '');
+      if (compact.length > MAX_DATA_URL_LEN) return null;
+      if (!DATA_IMAGE_RE.test(compact)) return null;
+      return compact;
+    }
+    if (s.length > 2000) return null;
     var u;
-    try { u = new URL(raw); } catch (_) { return null; }
+    try { u = new URL(s); } catch (_) { return null; }
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
     if (u.username || u.password) return null;
     if (!IMG_EXT.test(u.pathname) && !IMGCHEST_HOST.test(u.hostname)) return null;
@@ -73,6 +86,14 @@
     img.addEventListener('click', function () { if (onZoom) onZoom(url, ''); });
     img.addEventListener('error', function () {
       // Not a direct image (e.g. an imgchest.com/p/... page link): show a safe link instead.
+      // Never dump a huge data: URL into the chat as link text.
+      if (/^data:/i.test(url)) {
+        var broken = doc.createElement('span');
+        broken.className = 'muted small';
+        broken.textContent = '[image unavailable]';
+        if (img.parentNode) img.parentNode.replaceChild(broken, img);
+        return;
+      }
       var a = doc.createElement('a');
       a.href = url;
       a.target = '_blank';

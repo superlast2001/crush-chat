@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Crush Chat</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div id="gate" class="gate">
@@ -112,15 +112,20 @@
               <textarea id="cardFetish" rows="2" maxlength="2000" placeholder="Anything else for this bot’s kinks…"></textarea>
             </label>
           </div>
-          <label class="field">Portrait image URL <span class="muted">(header / avatar — optional)</span>
-            <input id="cardImage" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://cdn.imgchest.com/files/….png">
+          <label class="field">Portrait image URL <span class="muted">(Imgchest link preferred — header / avatar)</span>
+            <input id="cardImage" type="text" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://cdn.imgchest.com/files/….gif or .png">
           </label>
+          <div class="btn-row pick-row">
+            <button id="btnPickPortrait" class="btn" type="button">📷 Pick from phone (optional)</button>
+            <input id="cardImageFile" type="file" accept="image/*" hidden>
+          </div>
+          <p class="muted small">Paste an <strong>Imgchest</strong> direct link (cdn.imgchest.com … .gif/.png/…). Animated <strong>.gif</strong> URLs play in chat. Phone pick is optional and stays on this device only.</p>
           <div class="avatar-preview-row">
             <span id="card-preview" class="avatar-slot"></span>
           </div>
 
           <h3>Images + triggers</h3>
-          <p class="note">When chat text contains a trigger phrase (e.g. <code>ares cum</code>), that image shows in the bubble. Comma-separated triggers OK. Case-insensitive.</p>
+          <p class="note">Paste an <strong>Imgchest URL</strong> (including <code>.gif</code> — it animates when the trigger fires). Optional: Pick from phone. Triggers are comma-separated, case-insensitive (e.g. <code>ares cum</code>).</p>
           <div id="bot-images-list" class="bot-images-list"></div>
           <div class="btn-row">
             <button id="btnAddBotImage" class="btn" type="button">＋ Add image</button>
@@ -224,17 +229,21 @@
   <section id="view-gallery" class="view">
     <div class="scroll">
       <h2>Gallery</h2>
-      <p class="note">Images for the active persona (Crush-style gallery). Repo JSON is the default; links you add or remove here stay in this browser until you commit changes on GitHub. Tap an image to zoom; use <strong>Remove</strong> to drop a link locally.</p>
+      <p class="note">Images for the active persona (Crush-style gallery). Prefer <strong>Imgchest</strong> direct links (including animated <code>.gif</code>). Links you add stay in this browser. Tap to zoom; <strong>Remove</strong> drops locally.</p>
       <div id="gallery-grid" class="gallery-grid"></div>
-      <p id="gallery-empty" class="muted small" hidden>No images yet. Paste a direct image link below.</p>
+      <p id="gallery-empty" class="muted small" hidden>No images yet. Paste an Imgchest link below (or pick from phone).</p>
       <form id="gallery-form" class="gallery-form" autocomplete="off">
-        <h3>Add image link (local)</h3>
-        <input id="gallery-url" type="url" inputmode="url" placeholder="https://cdn.imgchest.com/files/….png" required>
+        <h3>Add image (Imgchest URL)</h3>
+        <input id="gallery-url" type="text" inputmode="url" placeholder="https://cdn.imgchest.com/files/….gif" required>
+        <div class="btn-row pick-row">
+          <button id="btnPickGallery" class="btn" type="button">📷 Pick from phone (optional)</button>
+          <input id="galleryImageFile" type="file" accept="image/*" hidden>
+        </div>
         <input id="gallery-caption" type="text" maxlength="200" placeholder="Caption (optional)">
         <input id="gallery-tag" type="text" maxlength="40" placeholder="Tag (optional)">
         <button class="btn primary" type="submit">Add to gallery</button>
         <p id="gallery-status" class="small" role="status"></p>
-        <p class="muted small">Only use images you own or created, of fictional adult characters. Accepted: http(s) with .jpg/.png/.webp/.gif/.avif, or imgchest.com.</p>
+        <p class="muted small">18+: only images you own/created of fictional adult characters. Best: Imgchest http(s) .jpg/.png/.webp/<strong>.gif</strong>/.avif or any imgchest.com host. Phone pick is optional (stored as a compressed photo on this device).</p>
       </form>
     </div>
   </section>
@@ -254,7 +263,7 @@
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 
-<script src="render.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script src="render.js?v=8"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
