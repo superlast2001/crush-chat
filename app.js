@@ -29,9 +29,10 @@
   };
 
   var MODEL_PICKS = [
-    { id: 'openrouter/free', label: 'openrouter/free (free)' },
-    { id: 'sao10k/l3.1-euryale-70b', label: 'sao10k/l3.1-euryale-70b (paid)' },
-    { id: 'sao10k/l3-lunaris-8b', label: 'sao10k/l3-lunaris-8b (paid)' }
+    { id: 'openrouter/free', label: 'openrouter/free ★' },
+    { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'llama-3.3-70b (free)' },
+    { id: 'google/gemma-3-27b-it:free', label: 'gemma-3-27b (free)' },
+    { id: 'sao10k/l3.1-euryale-70b', label: 'sao10k euryale (paid optional)' }
   ];
 
   var INTENSITIES = ['soft', 'normal', 'max'];

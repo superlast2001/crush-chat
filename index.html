@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Crush Chat</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <div id="gate" class="gate">
@@ -155,7 +155,7 @@
         <input id="model" type="text" autocapitalize="off" spellcheck="false" placeholder="openrouter/free">
       </label>
       <div id="modelPicks" class="chips"></div>
-      <p class="note">Default is <code>openrouter/free</code>. Free models often refuse NSFW or go vague/dumb mid-scene. For vivid multi-bot adult roleplay, prefer a capable paid model such as <code>sao10k/l3.1-euryale-70b</code> (needs OpenRouter credit). Your saved key/model are never changed automatically.</p>
+      <p class="note">Default is free: tap <strong>openrouter/free</strong> below, paste your OpenRouter key, Save. Free models sometimes refuse NSFW — if a reply goes blank or soft, tap Regenerate or try another free id from OpenRouter’s free list. Paid models are optional only.</p>
       <label class="field">Intensity
         <select id="intensity">
           <option value="soft">Soft (same as Max)</option>
@@ -212,7 +212,7 @@
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 
-<script src="render.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="render.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
