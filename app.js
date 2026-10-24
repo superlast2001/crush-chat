@@ -37,6 +37,31 @@
     { id: 'sao10k/l3.1-euryale-70b', label: 'sao10k euryale (paid optional)' }
   ];
 
+
+  /* Basic fetish catalog — chips inject short labels into the bot system prompt */
+  var FETISH_CATALOG = [
+    { id: 'size-diff', label: 'Size difference', prompt: 'size difference (clear physical size gap)' },
+    { id: 'height-diff', label: 'Height difference', prompt: 'height difference (taller/shorter gap)' },
+    { id: 'somno', label: 'Somnophilia', prompt: 'somnophilia / somno (asleep partner, adults 18+)' },
+    { id: 'cnc', label: 'CNC', prompt: 'CNC (consensual non-consent roleplay, adults 18+)' },
+    { id: 'unconscious', label: 'Unconscious', prompt: 'unconscious (erotic fiction, adults 18+ only)' },
+    { id: 'necro', label: 'Necrophilia', prompt: 'necrophilia fiction (all characters portrayed adult 18+)' },
+    { id: 'incest', label: 'Incest / taboo', prompt: 'incest / taboo family roleplay (all 18+ adults)' },
+    { id: 'mind-control', label: 'Mind control', prompt: 'mind control / hypnosis kink' },
+    { id: 'breeding', label: 'Breeding', prompt: 'breeding / impregnation kink' },
+    { id: 'noncon-play', label: 'Noncon play', prompt: 'noncon fantasy play between consenting adults' },
+    { id: 'dom-sub', label: 'Dom / sub', prompt: 'D/s power exchange' },
+    { id: 'petplay', label: 'Pet play', prompt: 'pet play' },
+    { id: 'voyeur', label: 'Voyeur', prompt: 'voyeurism' },
+    { id: 'exhibition', label: 'Exhibition', prompt: 'exhibitionism' },
+    { id: 'corruption', label: 'Corruption', prompt: 'corruption kink' },
+    { id: 'freeuse', label: 'Free use', prompt: 'free use' },
+    { id: 'public', label: 'Public', prompt: 'public / risky sex' },
+    { id: 'monster', label: 'Monster', prompt: 'monster / non-human partner (fiction)' },
+    { id: 'tentacles', label: 'Tentacles', prompt: 'tentacles' },
+    { id: 'transformation', label: 'Transformation', prompt: 'transformation / TF' }
+  ];
+
   var INTENSITIES = ['soft', 'normal', 'max'];
   var DEFAULT_INTENSITY = 'max';
   var STYLE = {
@@ -217,6 +242,32 @@
     return out;
   }
 
+  function normalizeFetishTags(arr) {
+    var allowed = {};
+    for (var i = 0; i < FETISH_CATALOG.length; i++) allowed[FETISH_CATALOG[i].id] = 1;
+    if (!Array.isArray(arr)) return [];
+    var out = [];
+    var seen = {};
+    for (var j = 0; j < arr.length; j++) {
+      var id = typeof arr[j] === 'string' ? arr[j] : '';
+      if (!id || !allowed[id] || seen[id]) continue;
+      seen[id] = 1;
+      out.push(id);
+    }
+    return out;
+  }
+
+  function fetishPromptLines(tags) {
+    var set = {};
+    (tags || []).forEach(function (t) { set[t] = 1; });
+    var lines = [];
+    for (var i = 0; i < FETISH_CATALOG.length; i++) {
+      var f = FETISH_CATALOG[i];
+      if (set[f.id]) lines.push('- ' + f.prompt);
+    }
+    return lines;
+  }
+
   function normalizeStoryBot(raw, id) {
     var bid = (typeof id === 'string' && id) ? id : (raw && raw.id) || uid('bot');
     var b = {
@@ -224,6 +275,7 @@
       name: clean(raw && raw.name, 80) || 'Bot',
       appearance: clean(raw && raw.appearance, 2000),
       fetish: clean(raw && raw.fetish, 2000),
+      fetishTags: normalizeFetishTags(raw && raw.fetishTags),
       avatar: normalizeImageUrl(raw && raw.avatar) || '',
       images: normalizeBotImages(raw && raw.images),
       tagline: '',
@@ -402,6 +454,13 @@
     return clean(p.fetish, 2000);
   }
 
+  function effectiveFetishTags(p) {
+    if (!p) return [];
+    var bot = storyBotById(p.id);
+    if (bot && bot.fetishTags && bot.fetishTags.length) return bot.fetishTags.slice();
+    return normalizeFetishTags(p.fetishTags);
+  }
+
   function sceneTitleKey() {
     return isPartyMode() ? partyKey() : ('solo:' + (state.activeId || 'none'));
   }
@@ -448,7 +507,9 @@
     lines.push('You are: ' + name);
     if (appearance) lines.push('Appearance (must match image): ' + appearance);
     if (avatar) lines.push('Image: ' + avatar);
-    if (fetish) lines.push('Sex fetish: ' + fetish);
+    var tagsC = effectiveFetishTags(p);
+    if (tagsC.length) lines.push('Fetishes: ' + fetishPromptLines(tagsC).map(function (l) { return l.replace(/^\- /, ''); }).join('; '));
+    if (fetish) lines.push('Sex fetish notes: ' + fetish);
     lines.push('Stay in character as ONLY this person. Never speak for the user. Do not go vague or OOC-dumb.');
     return lines.join('\n');
   }
@@ -483,8 +544,16 @@
       lines.push('Image / portrait URL: ' + avatar);
       lines.push('Treat that image as ground truth for your body, face, hair, clothes, and vibe.');
     }
+    var tags = effectiveFetishTags(p);
+    var tagLines = fetishPromptLines(tags);
+    if (tagLines.length) {
+      lines.push('SELECTED FETISHES (adult 18+ only — recognize and roleplay when relevant):');
+      for (var ti = 0; ti < tagLines.length; ti++) lines.push(tagLines[ti]);
+    }
     if (fetish) {
-      lines.push('Sex fetish / kinks (adult 18+ only): ' + fetish);
+      lines.push('Sex fetish notes (adult 18+ only): ' + fetish);
+    }
+    if (tagLines.length || fetish) {
       lines.push('When the scene is sexual, lean into these preferences. Every character involved must be 18+ adults.');
     }
     var imgs = (p.images && p.images.length) ? p.images : (storyBotById(p.id) && storyBotById(p.id).images) || [];
@@ -758,7 +827,7 @@
         var st = currentSceneTitle();
         e.textContent = (st ? (st + ' — ') : '') + 'Multi-bot chat with ' + names + '. Send a message — each character replies in turn.';
       } else {
-        e.textContent = p ? ('Start chatting with ' + effectiveName(p) + '.') : 'Open Cards → Add Story → Add bot, then chat.';
+        e.textContent = p ? ('Start chatting with ' + effectiveName(p) + '.') : 'Open Stories → Create → Add bot, then Chat.';
       }
       box.appendChild(e);
     }
@@ -876,7 +945,7 @@
     showChatError(null);
     var speakers = speakersForNextTurn();
     if (!speakers.length) {
-      showChatError('Open Cards → Add Story → Add bot, then chat.');
+      showChatError('Open Stories → Create → Add bot, then Chat.');
       return;
     }
     setBusy(true);
@@ -906,7 +975,7 @@
     if (isPartyMode()) {
       if (!partyPersonas().length) { showChatError('Party has no valid characters.'); return; }
     } else if (!activePersona()) {
-      showChatError('Open Cards → Add Story → Add bot first.');
+      showChatError('Open Stories → Create → Add bot first.');
       return;
     }
     chat().push({ role: 'user', content: text });
@@ -1037,33 +1106,111 @@
     });
   }
 
+  function storyCoverUrl(s) {
+    if (!s || !s.bots) return '';
+    for (var i = 0; i < s.bots.length; i++) {
+      var b = s.bots[i];
+      if (b.avatar) return b.avatar;
+      if (b.images && b.images[0] && b.images[0].url) return b.images[0].url;
+    }
+    return '';
+  }
+
+  function storyTagPreview(s) {
+    var tags = [];
+    var seen = {};
+    if (!s || !s.bots) return tags;
+    for (var i = 0; i < s.bots.length; i++) {
+      var ft = s.bots[i].fetishTags || [];
+      for (var j = 0; j < ft.length; j++) {
+        if (seen[ft[j]]) continue;
+        seen[ft[j]] = 1;
+        var lab = null;
+        for (var k = 0; k < FETISH_CATALOG.length; k++) {
+          if (FETISH_CATALOG[k].id === ft[j]) { lab = FETISH_CATALOG[k].label; break; }
+        }
+        if (lab) tags.push(lab);
+        if (tags.length >= 3) return tags;
+      }
+    }
+    return tags;
+  }
+
   function renderStoryList() {
     var list = $('story-list');
     if (!list) return;
     list.innerHTML = '';
     if (!state.stories.length) {
       var empty = document.createElement('div');
-      empty.className = 'bot-empty';
-      empty.textContent = 'No stories yet. Tap ＋ Add Story.';
+      empty.className = 'story-empty';
+      empty.innerHTML = '<strong>No stories yet</strong>Tap ＋ Create to make one — then add bots.';
       list.appendChild(empty);
       return;
     }
     state.stories.forEach(function (s) {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'bot-card' + (s.id === state.activeStoryId ? ' selected' : '');
+      btn.className = 'story-tile' + (s.id === state.activeStoryId ? ' selected' : '');
       btn.setAttribute('role', 'listitem');
-      var meta = document.createElement('div');
-      meta.className = 'bot-card-meta';
-      var name = document.createElement('div');
-      name.className = 'bot-card-name';
-      name.textContent = s.title || 'Untitled story';
-      var sub = document.createElement('div');
-      sub.className = 'bot-card-sub story-card-count';
-      sub.textContent = (s.bots.length || 0) + ' bot' + (s.bots.length === 1 ? '' : 's');
-      meta.appendChild(name);
-      meta.appendChild(sub);
-      btn.appendChild(meta);
+
+      var cover = document.createElement('div');
+      cover.className = 'story-cover';
+      var url = storyCoverUrl(s);
+      if (url) {
+        var img = document.createElement('img');
+        img.src = url;
+        img.alt = '';
+        img.referrerPolicy = 'no-referrer';
+        img.loading = 'lazy';
+        img.onerror = function () {
+          img.remove();
+          var fb = document.createElement('div');
+          fb.className = 'story-cover-fallback';
+          fb.textContent = '🎭';
+          cover.appendChild(fb);
+        };
+        cover.appendChild(img);
+      } else {
+        var fb0 = document.createElement('div');
+        fb0.className = 'story-cover-fallback';
+        fb0.textContent = '🎭';
+        cover.appendChild(fb0);
+      }
+      var stats = document.createElement('div');
+      stats.className = 'story-cover-stats';
+      var st = document.createElement('span');
+      st.className = 'story-stat';
+      st.textContent = (s.bots.length || 0) + ' bot' + (s.bots.length === 1 ? '' : 's');
+      stats.appendChild(st);
+      cover.appendChild(stats);
+
+      var body = document.createElement('div');
+      body.className = 'story-body';
+      var title = document.createElement('div');
+      title.className = 'story-tile-title';
+      title.textContent = s.title || 'Untitled story';
+      var desc = document.createElement('div');
+      desc.className = 'story-tile-desc';
+      var names = (s.bots || []).map(function (b) { return b.name || 'Bot'; }).filter(Boolean);
+      desc.textContent = names.length ? names.join(' · ') : 'Empty — add bots';
+      var tagRow = document.createElement('div');
+      tagRow.className = 'story-tile-tags';
+      var t18 = document.createElement('span');
+      t18.className = 'story-tag hot';
+      t18.textContent = '18+';
+      tagRow.appendChild(t18);
+      storyTagPreview(s).forEach(function (lab) {
+        var tg = document.createElement('span');
+        tg.className = 'story-tag';
+        tg.textContent = lab;
+        tagRow.appendChild(tg);
+      });
+      body.appendChild(title);
+      body.appendChild(desc);
+      body.appendChild(tagRow);
+
+      btn.appendChild(cover);
+      btn.appendChild(body);
       btn.onclick = function () { openStory(s.id); };
       list.appendChild(btn);
     });
@@ -1199,6 +1346,7 @@
       name: preset.name,
       appearance: '',
       fetish: '',
+      fetishTags: [],
       avatar: preset.avatar || '',
       personality: preset.personality || '',
       speaking_style: preset.speaking_style || '',
@@ -1226,7 +1374,7 @@
       s = activeStory();
     }
     if (!s) return;
-    var b = normalizeStoryBot({ name: 'New bot', appearance: '', fetish: '', images: [] });
+    var b = normalizeStoryBot({ name: 'New bot', appearance: '', fetish: '', fetishTags: [], images: [] });
     s.bots.push(b);
     saveStories();
     syncPersonasFromStory();
@@ -1382,12 +1530,14 @@
     if (!b) {
       var label0 = $('card-editing');
       if (label0) label0.textContent = 'Tap a bot above, or Add bot.';
+      renderFetishCatalog([]);
       return;
     }
     if ($('cardName')) $('cardName').value = b.name || '';
     if ($('cardAppearance')) $('cardAppearance').value = b.appearance || '';
     if ($('cardFetish')) $('cardFetish').value = b.fetish || '';
     if ($('cardImage')) $('cardImage').value = b.avatar || '';
+    renderFetishCatalog(b.fetishTags || []);
     renderBotImagesEditor(b.images || []);
     var prev = $('card-preview');
     if (prev) {
@@ -1401,6 +1551,36 @@
   function setCardStatus(t) {
     var el = $('cardStatus');
     if (el) el.textContent = t || '';
+  }
+
+  function selectedFetishTagsFromUI() {
+    var wrap = $('fetish-catalog');
+    if (!wrap) return [];
+    var out = [];
+    wrap.querySelectorAll('.fetish-chip.on').forEach(function (btn) {
+      var id = btn.getAttribute('data-fetish');
+      if (id) out.push(id);
+    });
+    return normalizeFetishTags(out);
+  }
+
+  function renderFetishCatalog(selected) {
+    var wrap = $('fetish-catalog');
+    if (!wrap) return;
+    var sel = {};
+    (selected || []).forEach(function (id) { sel[id] = 1; });
+    wrap.innerHTML = '';
+    FETISH_CATALOG.forEach(function (f) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fetish-chip' + (sel[f.id] ? ' on' : '');
+      btn.setAttribute('data-fetish', f.id);
+      btn.textContent = f.label;
+      btn.onclick = function () {
+        btn.classList.toggle('on');
+      };
+      wrap.appendChild(btn);
+    });
   }
 
   function saveCardFromForm() {
@@ -1444,6 +1624,7 @@
     b.name = name;
     b.appearance = appearance;
     b.fetish = fetish;
+    b.fetishTags = selectedFetishTagsFromUI();
     b.avatar = avatar || (images[0] && images[0].url) || '';
     b.images = images;
     b.greeting = b.greeting || ('*' + name + ' is here.*');
@@ -1680,7 +1861,8 @@
     });
     if (name === 'chat') renderMessages();
     if (name === 'personas') {
-      if (state.activeStoryId && activeStory()) showCardsPanel('story');
+      /* Stay on Explore grid unless user already opened a story this session */
+      if (state.cardsPanel === 'story' && activeStory()) showCardsPanel('story');
       else showCardsPanel('list');
       renderStoryList();
       renderPersonaPicker();
@@ -2021,7 +2203,7 @@
 
     renderSettings();
     refreshHeader();
-    showCardsPanel(activeStory() ? 'story' : 'list');
+    showCardsPanel('list');
     renderStoryList();
     renderPersonaPicker();
     fillStoryEditor();
@@ -2030,8 +2212,10 @@
     fillCardEditor();
     renderGallery();
     startChat(false);
+    showView('personas');
+    if ($('btnAddStoryBottom')) $('btnAddStoryBottom').onclick = addStory;
     if (!state.settings.apiKey) {
-      showChatError('Welcome! Open ⚙️ Settings to add your API key and model, then come back here to chat.');
+      showChatError('Welcome! Start on Stories, or open ⚙️ Settings to add your API key.');
     }
   }
 

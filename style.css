@@ -193,3 +193,169 @@ input[type=range] { padding: 0; height: 44px; }
 .bot-image-row .field { margin: 0; }
 .bot-image-actions { display: flex; gap: 8px; }
 .story-card-count { font-size: 12px; color: var(--muted); }
+
+/* ===== Smash Explore–style redesign (v6) ===== */
+:root {
+  --bg: #0a0a0c;
+  --panel: #121218;
+  --panel2: #1a1a22;
+  --border: #2a2a36;
+  --text: #f2f2f5;
+  --muted: #8e8e9a;
+  --accent: #ff4d8d;
+  --accent2: #e63d7a;
+  --danger: #e5484d;
+  --user: #2a1a28;
+  --bot: #14141c;
+  --chip: #252530;
+  --tag18: #ff4d8d;
+}
+
+.btn.primary { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.btn.primary:hover { background: var(--accent); }
+.tab.active { color: var(--text); }
+.tab.active span { color: var(--accent); }
+.tab.active::after {
+  content: "";
+  display: block;
+  width: 5px; height: 5px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.party-chip.direct { border-color: var(--accent); background: #2a1a24; box-shadow: 0 0 0 1px var(--accent); }
+.bot-card.selected { border-color: var(--accent); background: #221820; box-shadow: 0 0 0 1px var(--accent); }
+.pick.selected { border-color: var(--accent); }
+.composer textarea:focus { border-color: var(--accent); }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); }
+.msg.streaming .body::after { color: var(--accent); }
+
+/* Explore home */
+.explore-home { padding-bottom: 24px; }
+.explore-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+.explore-title {
+  margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 40%, var(--accent));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.explore-sub { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+.create-fab {
+  width: 52px; height: 52px; min-height: 52px; padding: 0;
+  border-radius: 50%; font-size: 28px; line-height: 1;
+  background: var(--accent2); border-color: var(--accent2); color: #fff;
+  flex: none; box-shadow: 0 6px 20px rgba(230, 61, 122, .45);
+}
+.create-fab:active { transform: scale(.94); }
+.explore-filters {
+  display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 14px;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.explore-filters::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex: none; background: var(--chip); color: var(--text);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600;
+  min-height: 36px; cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--accent2); border-color: var(--accent2); color: #fff;
+}
+.filter-chip.tag-18 { color: var(--tag18); border-color: #5a2a3a; }
+.explore-create-row { margin-top: 8px; }
+
+/* Story grid — Smash-like tall cards */
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 0 0 8px;
+}
+.story-tile {
+  display: flex; flex-direction: column;
+  padding: 0; text-align: left;
+  background: var(--panel2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 16px;
+  overflow: hidden; font: inherit; cursor: pointer;
+  touch-action: manipulation; min-height: 0;
+}
+.story-tile:active { transform: scale(.98); }
+.story-tile.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.story-cover {
+  position: relative; width: 100%; aspect-ratio: 3 / 4;
+  background: linear-gradient(160deg, #2a1a28, #14141c 60%, #1a2030);
+  overflow: hidden;
+}
+.story-cover img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.story-cover-fallback {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: 42px; opacity: .55;
+}
+.story-cover-stats {
+  position: absolute; left: 8px; bottom: 8px;
+  display: flex; gap: 6px;
+}
+.story-stat {
+  background: rgba(0,0,0,.62); color: #fff;
+  font-size: 11px; font-weight: 650;
+  padding: 3px 7px; border-radius: 8px;
+}
+.story-body { padding: 10px 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.story-tile-title {
+  font-weight: 750; font-size: 15px; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.story-tile-desc {
+  font-size: 12px; color: var(--muted); line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.story-tile-tags {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+}
+.story-tag {
+  font-size: 10px; font-weight: 650;
+  padding: 3px 7px; border-radius: 999px;
+  background: var(--chip); color: var(--muted); border: 1px solid var(--border);
+}
+.story-tag.hot { background: rgba(255, 77, 141, .18); color: var(--accent); border-color: #5a2a3a; }
+.story-empty {
+  grid-column: 1 / -1;
+  color: var(--muted); text-align: center;
+  padding: 36px 16px;
+  border: 1px dashed var(--border); border-radius: 16px;
+  background: var(--panel);
+}
+.story-empty strong { display: block; color: var(--text); font-size: 17px; margin-bottom: 6px; }
+
+/* Fetish catalog chips */
+.fetish-block { margin: 14px 0; }
+.fetish-block h3 { margin: 0 0 6px; }
+.fetish-catalog {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 10px 0 12px;
+}
+.fetish-chip {
+  background: var(--chip); color: var(--text);
+  border: 1.5px solid var(--border); border-radius: 999px;
+  padding: 8px 12px; font: inherit; font-size: 13px; font-weight: 600;
+  min-height: 38px; cursor: pointer; touch-action: manipulation;
+}
+.fetish-chip:active { transform: scale(.97); }
+.fetish-chip.on {
+  background: rgba(255, 77, 141, .2);
+  border-color: var(--accent);
+  color: #ffc0d6;
+  box-shadow: 0 0 0 1px rgba(255, 77, 141, .35);
+}
+
+@media (max-width: 520px) {
+  .explore-title { font-size: 24px; }
+  .story-tile-title { font-size: 14px; }
+}

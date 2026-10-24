@@ -29,15 +29,18 @@ The app talks to any **OpenAI-compatible** chat API from your browser.
 
 Quick picks in Settings are labelled free vs paid. Euryale-style models need OpenRouter credit; free models may refuse NSFW.
 
-## 3. Stories & custom bots (Cards)
-Bottom nav: **Chat | Cards | Prompt | Settings | Gallery**.
+## 3. Stories home (Smash Explore–style)
+Bottom nav: **Stories | Chat | Settings | Prompt | Gallery**.
 
-1. **Cards → Add Story** — give it a title.
-2. Open the story → **Add bot** — Name, Appearance, Sex fetish, optional portrait URL.
-3. **Images + triggers** — Image URL + comma-separated trigger phrases (e.g. `ares cum`). When that text appears in chat (you or a bot), the image shows in the bubble.
-4. **Open Chat** — each bot replies as itself (separate API calls). You play your own role.
+**Stories is the homepage** — big cards, ＋ Create, tap a card to edit bots.
 
-Everything saves in this browser (`cchat_` localStorage). Optional preset templates (Ember / Kael / Default) can seed a custom bot; they are not the main flow.
+1. **Stories → ＋ Create** — name the story.
+2. **Add bot** — Name, Appearance, optional portrait URL.
+3. **Fetish tags** — tap chips (size difference, somno, CNC, etc.). Selected tags inject into that bot’s system prompt. Free models may still refuse NSFW.
+4. **Images + triggers** — Image URL + phrases (e.g. `ares cum`). Matching chat text shows the image.
+5. **Open Chat** — multi-bot shared chat; each bot replies as itself.
+
+Everything saves in this browser (`cchat_` localStorage). Optional preset templates can seed a bot; they are not the main flow.
 
 ## 4. Edit prompts and personas on GitHub
 - **`lib/prompt.txt`** — hard rules + general tone (always assembled first). Edit on GitHub → pencil → Commit. After Pages refreshes, tap **Load from lib** in the Prompt tab (or Reset if you had an override).

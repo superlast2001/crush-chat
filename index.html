@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<meta name="theme-color" content="#0e0f13">
+<meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Crush Chat</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <div id="gate" class="gate">
@@ -28,7 +28,7 @@
     <div class="title">
       <span id="header-avatar" class="avatar-slot"></span>
       <span class="title-text">
-        <span id="header-name" class="header-name">Crush Chat</span>
+        <span id="header-name" class="header-name">Crush</span>
         <span id="model-tag" class="tag"></span>
       </span>
     </div>
@@ -36,7 +36,7 @@
   </header>
 
   <!-- CHAT -->
-  <section id="view-chat" class="view active">
+  <section id="view-chat" class="view">
     <div id="messages" class="messages" aria-live="polite"></div>
     <div id="chatError" class="error hidden"></div>
     <div class="chat-tools">
@@ -51,15 +51,25 @@
   </section>
 
   <!-- STORIES / BOTS / IMAGE TRIGGERS -->
-  <section id="view-personas" class="view">
+  <section id="view-personas" class="view active">
     <div class="scroll">
       <!-- STORY LIST -->
-      <div id="stories-panel">
-        <h2>Stories</h2>
-        <p class="note">Create stories like a list app. Open one to add bots. Adults 18+ only.</p>
-        <div id="story-list" class="bot-list" role="list" aria-label="Stories"></div>
-        <div class="btn-row">
-          <button id="btnAddStory" class="btn primary big" type="button">＋ Add Story</button>
+      <div id="stories-panel" class="explore-home">
+        <div class="explore-top">
+          <div class="explore-brand">
+            <h1 class="explore-title">Explore</h1>
+            <p class="explore-sub">Stories · tap a card to edit bots · 18+</p>
+          </div>
+          <button id="btnAddStory" class="btn create-fab" type="button" aria-label="Create story">＋</button>
+        </div>
+        <div class="explore-filters" aria-label="Quick filters">
+          <button type="button" class="filter-chip active" data-filter="all">All</button>
+          <button type="button" class="filter-chip" data-filter="mine">My stories</button>
+          <button type="button" class="filter-chip tag-18">18+</button>
+        </div>
+        <div id="story-list" class="story-grid" role="list" aria-label="Stories"></div>
+        <div class="btn-row explore-create-row">
+          <button id="btnAddStoryBottom" class="btn primary big" type="button">＋ Create story</button>
         </div>
         <details class="templates-fold">
           <summary>Optional templates (not required)</summary>
@@ -94,9 +104,14 @@
           <label class="field">Appearance <span class="muted">(tells the model how they look — match the images)</span>
             <textarea id="cardAppearance" rows="4" maxlength="2000" placeholder="Body, face, hair, clothes, age presentation (18+ adults only)…"></textarea>
           </label>
-          <label class="field">Sex fetish <span class="muted">(adults 18+ only)</span>
-            <textarea id="cardFetish" rows="3" maxlength="2000" placeholder="e.g. taboo family roleplay, mind control, …"></textarea>
-          </label>
+          <div class="fetish-block">
+            <h3>Fetish tags <span class="muted">(tap to select · 18+ only)</span></h3>
+            <p class="note">Selected tags inject into this bot’s system prompt so the AI recognizes the kink. Free models may still refuse.</p>
+            <div id="fetish-catalog" class="fetish-catalog" role="group" aria-label="Fetish catalog"></div>
+            <label class="field">Extra notes <span class="muted">(optional free text)</span>
+              <textarea id="cardFetish" rows="2" maxlength="2000" placeholder="Anything else for this bot’s kinks…"></textarea>
+            </label>
+          </div>
           <label class="field">Portrait image URL <span class="muted">(header / avatar — optional)</span>
             <input id="cardImage" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://cdn.imgchest.com/files/….png">
           </label>
@@ -166,7 +181,8 @@
   <!-- SETTINGS -->
   <section id="view-settings" class="view">
     <div class="scroll">
-      <h2>API Settings</h2>
+      <h2>Settings</h2>
+      <p class="note">API key, free model default (<code>openrouter/free</code>), intensity. Key stays in this browser only.</p>
       <label class="field">API base URL
         <input id="baseUrl" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://openrouter.ai/api/v1">
       </label>
@@ -224,10 +240,10 @@
   </section>
 
   <nav class="tabbar">
-    <button data-view="chat" class="tab active" type="button">💬<span>Chat</span></button>
-    <button data-view="personas" class="tab" type="button">🎭<span>Cards</span></button>
-    <button data-view="prompt" class="tab" type="button">📝<span>Prompt</span></button>
+    <button data-view="personas" class="tab active" type="button">🧭<span>Stories</span></button>
+    <button data-view="chat" class="tab" type="button">💬<span>Chat</span></button>
     <button data-view="settings" class="tab" type="button">⚙️<span>Settings</span></button>
+    <button data-view="prompt" class="tab" type="button">📝<span>Prompt</span></button>
     <button data-view="gallery" class="tab" type="button">🖼<span>Gallery</span></button>
   </nav>
 </div>
@@ -238,7 +254,7 @@
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 
-<script src="render.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="render.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
