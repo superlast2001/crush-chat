@@ -266,6 +266,29 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); }
 .filter-chip.tag-18 { color: var(--tag18); border-color: #5a2a3a; }
 .explore-create-row { margin-top: 8px; }
 
+/* One-tap sample story on Explore home */
+.sample-story-tile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  width: 100%; margin: 0 0 14px; padding: 14px 14px 16px;
+  text-align: left; font: inherit; cursor: pointer;
+  color: var(--text);
+  background: linear-gradient(160deg, #2a1624 0%, var(--panel2) 55%, #16161e);
+  border: 1px solid #5a2a3a; border-radius: 16px;
+  touch-action: manipulation;
+}
+.sample-story-tile:active { transform: scale(.99); }
+.sample-story-badge {
+  font-size: 10px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px;
+  background: rgba(255, 77, 141, .2); color: var(--accent); border: 1px solid #5a2a3a;
+}
+.sample-story-title {
+  font-weight: 800; font-size: 17px; line-height: 1.25;
+}
+.sample-story-desc {
+  font-size: 13px; color: var(--muted); line-height: 1.4;
+}
+
 /* Story grid — Smash-like tall cards */
 .story-grid {
   display: grid;

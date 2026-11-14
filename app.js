@@ -1429,6 +1429,55 @@
     if (titleEl) { titleEl.focus(); titleEl.select(); }
   }
 
+  var SAMPLE_GRANDPA_ARES_ID = 'sample-grandpa-ares';
+
+  function buildSampleGrandpaAresStory() {
+    return normalizeStory({
+      id: SAMPLE_GRANDPA_ARES_ID,
+      title: 'Grandpa & Ares',
+      worldSetting: 'The user plays Grandpa, an adult man who lives in a quiet countryside house. His grandson Ares, 20 years old, has come to stay for the summer. Ares has secretly discovered he has mind control powers and has started testing them on Grandpa. Adult taboo fiction; both characters are adults.',
+      bots: [{
+        name: 'Ares',
+        appearance: '20-year-old adult man, athletic build, short dark hair, confident smirk, casual t-shirt and shorts.',
+        personality: 'Playful, confident, smart, and teasing. Uses his secret mind-control power subtly at first, then escalates as he tests Grandpa. Stays clever — never dumb or airheaded.',
+        speaking_style: 'Speaks in character. Sharp, teasing, and confident; stays clever and in control of the conversation.',
+        scenario: 'Summer stay at Grandpa\'s quiet countryside house. Ares has just begun testing his mind-control powers on Grandpa.',
+        fetish: 'Mind control and hypnosis used on Grandpa; taboo adult grandson/grandfather dynamic; slow corruption and escalation.',
+        fetishTags: ['mind-control', 'incest', 'age-gap', 'corruption', 'hypnosis'],
+        greeting: '*Ares leans in the doorway of the countryside house, a knowing grin already on his face as he looks you over — Grandpa, home for the summer with him.* Hey. Miss me? Don\'t worry. I have a feeling you\'re going to do exactly what I want this time.',
+        images: []
+      }]
+    });
+  }
+
+  function loadSampleGrandpaAres() {
+    var existing = null;
+    for (var i = 0; i < state.stories.length; i++) {
+      if (state.stories[i].id === SAMPLE_GRANDPA_ARES_ID) {
+        existing = state.stories[i];
+        break;
+      }
+    }
+    if (existing) {
+      openStory(existing.id);
+      if (existing.bots[0]) {
+        state.editingBotId = existing.bots[0].id;
+        fillCardEditor();
+      }
+      setCardStatus('Sample already loaded — you can edit it. To add a trigger image, paste an Imgchest URL or Pick from phone, set trigger “ares cum”, then Save bot.');
+      return;
+    }
+    var s = buildSampleGrandpaAresStory();
+    state.stories.unshift(s);
+    saveStories();
+    openStory(s.id);
+    if (s.bots[0]) {
+      state.editingBotId = s.bots[0].id;
+      fillCardEditor();
+    }
+    setCardStatus('Sample loaded ✔ — add Ares’s trigger image: paste an Imgchest URL or Pick from phone, trigger “ares cum”, then Save bot.');
+  }
+
   function deleteActiveStory() {
     var s = activeStory();
     if (!s) return;
@@ -2342,6 +2391,7 @@
     if ($('btnClearCard')) $('btnClearCard').onclick = clearCardOverrides;
     if ($('btnClearParty')) $('btnClearParty').onclick = clearParty;
     if ($('btnAddStory')) $('btnAddStory').onclick = addStory;
+    if ($('btnLoadSampleAres')) $('btnLoadSampleAres').onclick = loadSampleGrandpaAres;
     if ($('btnAddBot')) $('btnAddBot').onclick = addBot;
     if ($('btnRemoveBot')) $('btnRemoveBot').onclick = removeEditingBot;
     if ($('btnAddBotImage')) $('btnAddBotImage').onclick = addBotImageRow;
